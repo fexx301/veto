@@ -35,4 +35,24 @@ serde_json = "=1.0.151"
 swig-interface = { git = "https://github.com/anagrambuild/swig-wallet", rev = "3e0411f0c2980b26296903eaa4aa0c2d07869316", optional = true }
 swig-state = { git = "https://github.com/anagrambuild/swig-wallet", rev = "3e0411f0c2980b26296903eaa4aa0c2d07869316", optional = true }
 
+[[bin]]
+name = "local_swig_flow"
+path = "src/bin/local_swig_flow.rs"
+required-features = ["client"]
+
+[[bin]]
+name = "external_operator_signer"
+path = "src/bin/external_operator_signer.rs"
+required-features = ["client"]
+
+[[bin]]
+name = "payment_flow"
+path = "src/bin/payment_flow.rs"
+required-features = ["client"]
+
+[[bin]]
+name = "route_flow"
+path = "src/bin/route_flow.rs"
+required-features = ["client"]
+
 [workspace]
