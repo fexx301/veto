@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 64" role="img" aria-label="Veto">
+  <circle cx="32" cy="32" r="32" fill="#C83406"/><path fill="#FDF8F3" d="M17.5 16.6Q17.5 15 19.1 15H26.9Q28.5 15 28.5 16.6V49L17.5 40.5Z M46.5 16.6Q46.5 15 44.9 15H37.1Q35.5 15 35.5 16.6V49L46.5 40.5Z"/>
+  <text x="80" y="48" fill="#1D130F" font-family="Geist, Inter, 'Helvetica Neue', Arial, sans-serif" font-size="46" font-weight="650" letter-spacing="-2">Veto</text>
+</svg>

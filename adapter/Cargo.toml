@@ -55,4 +55,9 @@ name = "route_flow"
 path = "src/bin/route_flow.rs"
 required-features = ["client"]
 
+[[bin]]
+name = "operator_server"
+path = "src/bin/operator_server.rs"
+required-features = ["client"]
+
 [workspace]
