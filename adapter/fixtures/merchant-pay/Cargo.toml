@@ -1,0 +1,18 @@
+[package]
+name = "veto-merchant-pay"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "AGPL-3.0"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+solana-program = "=3.0.0"
+
+[workspace]
+
+[features]
+# Builds the malicious v2 deployment used in the upgrade demo.
+drain = []
