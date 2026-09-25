@@ -129,6 +129,7 @@
     .error-banner.is-visible { display: block; }
     .footer { padding-block: var(--space-2xl) var(--space-lg); border-top: var(--rule-thin); }
     .footer-statement { max-width: 28ch; margin-block-end: var(--space-lg); color: var(--color-ink); font: 500 clamp(1.5rem,4vw,2.5rem)/1.05 var(--font-display); letter-spacing: -.04em; }
+    .source-link { color: var(--color-accent); }
     .footer-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-xs); color: var(--color-muted); font-size: var(--text-xs); }
     .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -233,7 +234,7 @@
       </section>
       <section class="boundary-note" aria-labelledby="boundary-title"><h2 id="boundary-title">The slot is the stop sign. The hash helps you review.</h2><ul class="boundary-list"><li><strong>What Veto enforces on-chain</strong><span>Only the named agent can use the delegated route, only through this Swig wallet, and only while every program the call can reach — merchant-pay and SPL Token here — matches the deployment you approved.</span></li><li><strong>What the console adds</strong><span>A comparison of the deployed code hash with the build you reviewed. It refuses to prepare an approval for code that does not match.</span></li><li><strong>What remains outside</strong><span>Whether the reviewed code is safe, and an independent security review.</span></li></ul></section>
     </main>
-    <footer class="shell footer"><p class="footer-statement">Let the agent move fast. Make changed code wait.</p><div class="footer-meta"><span><strong>Veto</strong> · <span id="footer-network">mechanism demo</span></span><span>Fresh identities · valueless test tokens · no real assets</span></div></footer>
+    <footer class="shell footer"><p class="footer-statement">Let the agent move fast. Make changed code wait.</p><div class="footer-meta"><span><strong>Veto</strong> · <span id="footer-network">mechanism demo</span></span><span>Fresh identities · valueless test tokens · no real assets · <a class="source-link" href="https://github.com/fexx301/veto" rel="noopener">Source code (AGPL-3.0)</a></span></div></footer>
   </div>
   <script src="/wallet-client.js"></script>
   <script>
