@@ -1,0 +1,39 @@
+generated_at 2026-09-24 20:38 UTC; rpc https://api.mainnet-beta.solana.com
+programs: 117 total, 117 measured, 0 errors, 0 not found
+upgradeable now: 115/117; immutable: 2; other loader: 0
+upgrade authority: single key 35, PDA (multisig/governance) 80
+upgraded at least once: last 90d 52/115, last 180d 67/115
+upgrades per upgradeable program, 180d: total 712, median 1, mean 6.2
+among programs upgraded in 180d: median 5 upgrades ≈ one every 36 days
+180d upgrade-count distribution: {'0': 48, '1-2': 18, '3-6 (≈monthly)': 22, '7-26 (≈weekly)': 18, '27+ (more than weekly)': 9}
+single-key authority AND upgraded in 180d: 19
+
+most upgraded (180d):
+   69 / 90d  25  single key                 ZeroFi (Jupiter-routed)  ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY
+   55 / 90d  20  single key                 BisonFi (Jupiter-routed)  BiSoNHVpsVZW2F7rx2eQ59yQwKxzU5NvBcmKshCSUypi
+   53 / 90d  10  PDA (multisig/governance)  Deriverse (Jupiter-routed)  DRVSpZ2YUYYKgZP8XtLhAGtT1zYSCKzeHfb4DgRnrgqD
+   45 / 90d  20  single key                 HumidiFi (Jupiter-routed)  9H6tua7jkLhdm3w8BvgpTn5LZNU7g4ZynDmCiNN3q6Rp
+   42 / 90d   2  single key                 WhaleStreet (Jupiter-routed)  FW6zUqn4iKRaeopwwhwsquTY6ABWLLgjxtrC3VPnaWBf
+   32 / 90d  24  single key                 Kipseli (Jupiter-routed)  3TK9D8aoBFYjYZtKCjciPrVrRStsnvo7KmpcJqDavpaU
+   31 / 90d  31  single key                 GatorSwap (Jupiter-routed)  gatorLx9aC1e5ZWAXscv5QRKiLXnLPLXjftVc81h1Hr
+   28 / 90d   8  single key                 BisonFi Predict (Jupiter-routed)  2DNbzPochEcyCcWMbL4d9S3u9QqQEj5bbe6cSZFvKsbh
+   27 / 90d  20  PDA (multisig/governance)  Perena Star V2 (Jupiter-routed)  save8RQVPMWNTzU18t3GBvBkN9hT7jsGjiCQ28FpD9H
+   23 / 90d  10  PDA (multisig/governance)  Jupiter Aggregator v6 (curated)  JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4
+
+curated first-hop programs:
+  Drift v2 (curated)                               upgradeable=True 90d=1 180d=6 auth=PDA (multisig/governance) 
+  Jupiter Aggregator v6 (curated)                  upgradeable=True 90d=10 180d=23 auth=PDA (multisig/governance) 
+  Jupiter DCA (curated)                            upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+  Kamino Lend (curated)                            upgradeable=True 90d=2 180d=9 auth=PDA (multisig/governance) 
+  marginfi v2 (curated)                            upgradeable=True 90d=3 180d=6 auth=PDA (multisig/governance) 
+  Marinade (curated)                               upgradeable=True 90d=1 180d=1 auth=PDA (multisig/governance) 
+  Perps (Jupiter-routed) + curated                 upgradeable=True 90d=0 180d=1 auth=PDA (multisig/governance) 
+  Save / Solend (curated)                          upgradeable=True 90d=0 180d=0 auth=single key 
+  Solana Subscriptions & Allowances (curated)      upgradeable=True 90d=2 180d=3 auth=PDA (multisig/governance) 
+  Squads v4 (curated)                              upgradeable=False 90d=0 180d=0 auth=None 
+  Swig wallet (curated)                            upgradeable=True 90d=5 180d=7 auth=PDA (multisig/governance) 
+  Token-2022 (curated)                             upgradeable=True 90d=0 180d=1 auth=PDA (multisig/governance) 
+
+immutable / other loaders:
+  Orca V1 (Jupiter-routed)  bpf-loader-v2 (immutable)
+  Squads v4 (curated)  bpf-loader-upgradeable

@@ -1,0 +1,117 @@
+[1/117] 1DEX (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[2/117] Aldrin (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[3/117] Aldrin V2 (Jupiter-routed): upgradeable=True 90d=1 180d=1 auth=single key 
+[4/117] AlphaQ (Jupiter-routed): upgradeable=True 90d=0 180d=5 auth=single key 
+[5/117] Aquifer (Jupiter-routed): upgradeable=True 90d=6 180d=8 auth=PDA (multisig/governance) 
+[6/117] Archer (Jupiter-routed): upgradeable=True 90d=2 180d=15 auth=PDA (multisig/governance) 
+[7/117] BinaryFi (Jupiter-routed): upgradeable=True 90d=14 180d=17 auth=single key 
+[8/117] BisonFi (Jupiter-routed): upgradeable=True 90d=20 180d=55 auth=single key 
+[9/117] BisonFi Predict (Jupiter-routed): upgradeable=True 90d=8 180d=28 auth=single key 
+[10/117] Bonkswap (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[11/117] Boop.fun (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[12/117] Byreal (Jupiter-routed): upgradeable=True 90d=1 180d=3 auth=PDA (multisig/governance) 
+[13/117] Carrot (Jupiter-routed): upgradeable=True 90d=0 180d=1 auth=PDA (multisig/governance) 
+[14/117] Crema (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[15/117] Cropper (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[16/117] DefiTuna (Jupiter-routed): upgradeable=True 90d=0 180d=4 auth=PDA (multisig/governance) 
+[17/117] Denali (Jupiter-routed): upgradeable=True 90d=0 180d=2 auth=PDA (multisig/governance) 
+[18/117] Deriverse (Jupiter-routed): upgradeable=True 90d=None 180d=None auth=PDA (multisig/governance) ERROR getTransaction: gave up after retries: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+[19/117] DexLab (Jupiter-routed): upgradeable=None 90d=None 180d=None auth=None ERROR getAccountInfo: gave up after retries: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+[20/117] Drift v2 (curated): upgradeable=True 90d=1 180d=6 auth=PDA (multisig/governance) 
+[21/117] Dynamic Bonding Curve (Jupiter-routed): upgradeable=True 90d=1 180d=2 auth=PDA (multisig/governance) 
+[22/117] Flint (Jupiter-routed): upgradeable=True 90d=2 180d=3 auth=PDA (multisig/governance) 
+[23/117] Flux (Jupiter-routed): upgradeable=True 90d=7 180d=12 auth=single key 
+[24/117] FluxBeam (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[25/117] GatorSwap (Jupiter-routed): upgradeable=True 90d=31 180d=31 auth=single key 
+[26/117] Gavel (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[27/117] GoonFi V2 (Jupiter-routed): upgradeable=True 90d=8 180d=18 auth=PDA (multisig/governance) 
+[28/117] GooseFX GAMMA (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[29/117] Guacswap (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[30/117] Hadron (Jupiter-routed): upgradeable=True 90d=0 180d=2 auth=PDA (multisig/governance) 
+[31/117] Heaven (Jupiter-routed): upgradeable=True 90d=0 180d=3 auth=PDA (multisig/governance) 
+[32/117] Helium Network (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[33/117] Huma (Jupiter-routed): upgradeable=True 90d=0 180d=2 auth=PDA (multisig/governance) 
+[34/117] HumidiFi (Jupiter-routed): upgradeable=True 90d=20 180d=45 auth=single key 
+[35/117] Hylo Exchange (Jupiter-routed): upgradeable=True 90d=10 180d=10 auth=PDA (multisig/governance) 
+[36/117] Invariant (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[37/117] Jupiter Aggregator v6 (curated): upgradeable=True 90d=None 180d=None auth=PDA (multisig/governance) ERROR getTransaction: {'code': -32015, 'message': 'Transaction version (1) is not supported by the requesting client. Please try the request again with the following configuration parameter: "maxSupportedTransactionVersion": 1'}
+[38/117] Jupiter DCA (curated): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[39/117] Jupiter Lend Earn (Jupiter-routed): upgradeable=True 90d=1 180d=1 auth=PDA (multisig/governance) 
+[40/117] JupiterRfqV2 (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[41/117] JupLend AMM (Jupiter-routed): upgradeable=True 90d=4 180d=7 auth=PDA (multisig/governance) 
+[42/117] Kamino Lend (curated): upgradeable=True 90d=2 180d=9 auth=PDA (multisig/governance) 
+[43/117] Kipseli (Jupiter-routed): upgradeable=True 90d=24 180d=32 auth=single key 
+[44/117] LemmingsFi (Jupiter-routed): upgradeable=True 90d=1 180d=5 auth=single key 
+[45/117] M Swap (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[46/117] Manifest (Jupiter-routed): upgradeable=True 90d=3 180d=7 auth=PDA (multisig/governance) 
+[47/117] marginfi v2 (curated): upgradeable=True 90d=3 180d=6 auth=PDA (multisig/governance) 
+[48/117] Marinade (curated): upgradeable=True 90d=None 180d=None auth=PDA (multisig/governance) ERROR getTransaction: {'code': -32015, 'message': 'Transaction version (1) is not supported by the requesting client. Please try the request again with the following configuration parameter: "maxSupportedTransactionVersion": 1'}
+[49/117] Mercurial (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[50/117] MetaDAO (Jupiter-routed): upgradeable=True 90d=0 180d=3 auth=PDA (multisig/governance) 
+[51/117] Meteora (Jupiter-routed): upgradeable=True 90d=1 180d=2 auth=PDA (multisig/governance) 
+[52/117] Meteora DAMM v2 (Jupiter-routed): upgradeable=True 90d=2 180d=4 auth=PDA (multisig/governance) 
+[53/117] Meteora DLMM (Jupiter-routed): upgradeable=True 90d=0 180d=3 auth=PDA (multisig/governance) 
+[54/117] Metric (Jupiter-routed): upgradeable=True 90d=4 180d=9 auth=single key 
+[55/117] Moonit (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[56/117] Obric V2 (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[57/117] Obsidian (Jupiter-routed): upgradeable=True 90d=1 180d=1 auth=PDA (multisig/governance) 
+[58/117] Omnipair (Jupiter-routed): upgradeable=True 90d=1 180d=5 auth=PDA (multisig/governance) 
+[59/117] OpenBook V2 (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[60/117] Orca V1 (Jupiter-routed): upgradeable=False 90d=None 180d=None auth=None 
+[61/117] Orca V2 (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[62/117] PancakeSwap (Jupiter-routed): upgradeable=True 90d=3 180d=4 auth=PDA (multisig/governance) 
+[63/117] Penguin (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[64/117] Perena (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[65/117] Perena Star V2 (Jupiter-routed): upgradeable=True 90d=20 180d=27 auth=PDA (multisig/governance) 
+[66/117] Perps (Jupiter-routed) + curated: upgradeable=True 90d=0 180d=1 auth=PDA (multisig/governance) 
+[67/117] Phoenix (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[68/117] Pump.fun (Jupiter-routed): upgradeable=True 90d=5 180d=14 auth=PDA (multisig/governance) 
+[69/117] Pump.fun Amm (Jupiter-routed): upgradeable=True 90d=3 180d=7 auth=PDA (multisig/governance) 
+[70/117] Quantum (Jupiter-routed): upgradeable=True 90d=8 180d=15 auth=single key 
+[71/117] Quay (Jupiter-routed): upgradeable=True 90d=6 180d=12 auth=PDA (multisig/governance) 
+[72/117] Raydium (Jupiter-routed): upgradeable=True 90d=2 180d=3 auth=PDA (multisig/governance) 
+[73/117] Raydium CLMM (Jupiter-routed): upgradeable=True 90d=5 180d=12 auth=PDA (multisig/governance) 
+[74/117] Raydium CP (Jupiter-routed): upgradeable=True 90d=2 180d=3 auth=PDA (multisig/governance) 
+[75/117] Raydium Launchlab (Jupiter-routed): upgradeable=True 90d=10 180d=11 auth=PDA (multisig/governance) 
+[76/117] Riptide (Jupiter-routed): upgradeable=True 90d=1 180d=4 auth=PDA (multisig/governance) 
+[77/117] RunnerRodeo (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[78/117] Saber (Decimals) (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[79/117] Saber (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[80/117] Sanctum (Jupiter-routed): upgradeable=True 90d=None 180d=None auth=PDA (multisig/governance) ERROR getTransaction: {'code': -32015, 'message': 'Transaction version (1) is not supported by the requesting client. Please try the request again with the following configuration parameter: "maxSupportedTransactionVersion": 1'}
+[81/117] Sanctum (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[82/117] Sanctum (Jupiter-routed): upgradeable=True 90d=None 180d=None auth=PDA (multisig/governance) ERROR getTransaction: {'code': -32015, 'message': 'Transaction version (1) is not supported by the requesting client. Please try the request again with the following configuration parameter: "maxSupportedTransactionVersion": 1'}
+[83/117] Sanctum (Jupiter-routed): upgradeable=True 90d=None 180d=None auth=PDA (multisig/governance) ERROR getTransaction: gave up after retries: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+[84/117] Sanctum Infinity (Jupiter-routed): upgradeable=True 90d=0 180d=1 auth=PDA (multisig/governance) 
+[85/117] Sanctum Prop S (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[86/117] Sanctum SOLS (Jupiter-routed): upgradeable=True 90d=1 180d=1 auth=PDA (multisig/governance) 
+[87/117] Saros (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[88/117] Saros DLMM (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[89/117] Save / Solend (curated): upgradeable=True 90d=0 180d=0 auth=single key 
+[90/117] Scale Amm (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[91/117] Scale Vmm (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[92/117] Scorch (Jupiter-routed): upgradeable=True 90d=4 180d=6 auth=single key 
+[93/117] Solana Subscriptions & Allowances (curated): upgradeable=True 90d=2 180d=3 auth=PDA (multisig/governance) 
+[94/117] Solayer (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[95/117] SolFi (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[96/117] SolFi V2 (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[97/117] Squads v4 (curated): upgradeable=False 90d=0 180d=0 auth=None 
+[98/117] Stabble CLMM (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[99/117] Stabble Stable Swap (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[100/117] Stabble Weighted Swap (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[101/117] Stableswap (Jupiter-routed): upgradeable=True 90d=0 180d=5 auth=single key 
+[102/117] StepN (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[103/117] Swig wallet (curated): upgradeable=True 90d=5 180d=7 auth=PDA (multisig/governance) 
+[104/117] TaurusFi (Jupiter-routed): upgradeable=True 90d=1 180d=3 auth=single key 
+[105/117] TesseraV (Jupiter-routed): upgradeable=True 90d=2 180d=5 auth=PDA (multisig/governance) 
+[106/117] Token Swap (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[107/117] Token-2022 (curated): upgradeable=True 90d=0 180d=1 auth=PDA (multisig/governance) 
+[108/117] Trench (Jupiter-routed): upgradeable=True 90d=2 180d=2 auth=single key 
+[109/117] Trends (Jupiter-routed): upgradeable=True 90d=0 180d=1 auth=single key 
+[110/117] VaultLiquidUnstake (Jupiter-routed): upgradeable=True 90d=0 180d=2 auth=PDA (multisig/governance) 
+[111/117] Virtuals (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[112/117] Voltr (Jupiter-routed): upgradeable=True 90d=4 180d=6 auth=PDA (multisig/governance) 
+[113/117] WhaleStreet (Jupiter-routed): upgradeable=True 90d=2 180d=42 auth=single key 
+[114/117] Whirlpool (Jupiter-routed): upgradeable=True 90d=1 180d=1 auth=PDA (multisig/governance) 
+[115/117] Woofi (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[116/117] XOrca (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=PDA (multisig/governance) 
+[117/117] ZeroFi (Jupiter-routed): upgradeable=True 90d=25 180d=69 auth=single key 

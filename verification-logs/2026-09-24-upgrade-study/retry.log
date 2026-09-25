@@ -1,0 +1,4 @@
+[retry 1/7] Deriverse (Jupiter-routed): upgradeable=True 90d=10 180d=53 auth=PDA (multisig/governance) 
+[retry 2/7] DexLab (Jupiter-routed): upgradeable=True 90d=0 180d=0 auth=single key 
+[retry 3/7] Jupiter Aggregator v6 (curated): upgradeable=True 90d=10 180d=23 auth=PDA (multisig/governance) 
+[retry 4/7] Marinade (curated): upgradeable=True 90d=1 180d=1 auth=PDA (multisig/governance) 
