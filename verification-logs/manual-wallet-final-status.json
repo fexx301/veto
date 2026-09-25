@@ -1,0 +1,19 @@
+{
+  "capturedAt": "2026-09-24",
+  "source": "GET http://127.0.0.1:4173/api/status after the user completed the manual browser-wallet workflow",
+  "approvedSlot": 305,
+  "counter": 2,
+  "currentSlot": 305,
+  "externalOperator": true,
+  "operator": "FbJLh2PYzDZ6rb9uVkM4vk7TnSgqizeUXHYeN2HtKBZ4",
+  "phase": "resumed",
+  "policy": "CJRt6et1fkg7e6NfktpKY1B2jfZqHLxecygDrHr6bcgL",
+  "swigConfig": "9BbAqiLU9sykVCcaS22fNcked9z26uDt1ZmCts7j3i9v",
+  "target": "7QZPz2HXUyQDcyE8tC7ckC9vJ1yqGV8r1b6GwKfRJSkF",
+  "latest": {
+    "label": "Delegated action resumed",
+    "detail": "The test agent called the reapproved target at slot 305. Counter: 1 → 2. Signature: cbmWBY35h9QnxNW1WGgsYToSk71i8fgixCZCiJMuBtL2kCB7B9Tv483EsuJAQRQCsqXrUHASeKqATWu7BKERdH8."
+  },
+  "walletProvider": "Phantom",
+  "limitations": "The user identified the wallet extension as Phantom after completing the workflow. This is final server-state evidence from a disposable local validator, not public-chain execution."
+}

@@ -1,0 +1,38 @@
+Wallet-binding run — 2026-09-23
+Checkout: /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration
+Swig source commit: 3e0411f0c2980b26296903eaa4aa0c2d07869316
+Ledger: /tmp/veto-swig-wallet-binding-final.DMf8H0
+RPC/faucet: http://127.0.0.1:8899 / 127.0.0.1:9900
+
+Validator launch, from the checkout root:
+
+/Users/femi/.local/share/solana/install/active_release/bin/solana-test-validator \
+  --ledger /tmp/veto-swig-wallet-binding-final.DMf8H0 \
+  --reset --clone-feature-set --url https://api.devnet.solana.com \
+  --rpc-port 8899 --faucet-port 9900 \
+  --upgradeable-program 22zNjxk9cSCWUB7FW85z1v2pQzAkYYobSrWxL2qatgC5 target/deploy/swig.so adapter/runtime-human.json \
+  --upgradeable-program G1uYbHAbmYoS4yom6MmmMfSt78tXNtPHMVfZBQ1jv5J7 adapter/target/deploy/binarylock_swig_gate.so adapter/runtime-human.json \
+  --upgradeable-program 5Nmr67T9jqUh1s9iU5ghABUFt8jMoG3REBZFwiioTMo3 ../binarylock/onchain/target-program/target/sbpfv3-solana-solana/release/binarylock_target.so adapter/runtime-human.json \
+  --bpf-program BXAu5ZWHnGun2XZjUZ9nqwiZ5dNVmofPGYdMC4rx4qLV target/deploy/test_program_authority.so
+
+The local human and agent keys already present in this isolated checkout were funded only by this local validator:
+
+/Users/femi/.local/share/solana/install/active_release/bin/solana airdrop 10 CpnzXrZarJH1qJoLjCif27qv4mvdBEiry6d1UNmQ284t --url http://127.0.0.1:8899
+/Users/femi/.local/share/solana/install/active_release/bin/solana airdrop 10 AfeXGRRTaKLy242tea1sfDxtv1yXhySDBgE8re2RRZyo --url http://127.0.0.1:8899
+
+Full patched flow command:
+
+RPC_URL=http://127.0.0.1:8899 \
+HUMAN_PATH=adapter/runtime-human.json \
+AGENT_PATH=adapter/runtime-agent.json \
+GATE_ID=G1uYbHAbmYoS4yom6MmmMfSt78tXNtPHMVfZBQ1jv5J7 \
+TARGET_ID=5Nmr67T9jqUh1s9iU5ghABUFt8jMoG3REBZFwiioTMo3 \
+RELAY_ID=BXAu5ZWHnGun2XZjUZ9nqwiZ5dNVmofPGYdMC4rx4qLV \
+TARGET_KEYPAIR=../binarylock/onchain/target-program/target/deploy/binarylock_target-keypair.json \
+TARGET_SO=../binarylock/onchain/target-program/target/sbpfv3-solana-solana/release/binarylock_target.so \
+SOLANA_BIN=/Users/femi/.local/share/solana/install/active_release/bin/solana \
+adapter/target/debug/local_swig_flow
+
+The final runner additionally removes the gate instruction from a valid SignV2 sequence and submits SignV2 alone. Swig rejected this at transaction index 0 with `Custom(3033)`; the target counter remained 1.
+
+Runner exit: 0. It submitted a loader upgrade and all expected-rejection cases to the local validator. The validator was stopped with Ctrl-C after `complete-flow-passed`; this is not a hosted validator.

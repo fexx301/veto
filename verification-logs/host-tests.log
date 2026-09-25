@@ -1,0 +1,363 @@
+warning: /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/Cargo.toml: Found `feature = ...` in `target.'cfg(...)'.dependencies`. This key is not supported for selecting dependencies and will not work as expected. Use the [features] section instead: https://doc.rust-lang.org/cargo/reference/features.html
+   Compiling swig-assertions v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/assertions)
+   Compiling swig v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program)
+   Compiling swig-compact-instructions v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/instructions)
+   Compiling swig-state v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state)
+warning: unused import: `no_padding::NoPadding`
+ --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/action/program_all.rs:7:5
+  |
+7 | use no_padding::NoPadding;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unexpected `cfg` condition value: `client`
+ --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/ed25519.rs:9:7
+  |
+9 | #[cfg(feature = "client")]
+  |       ^^^^^^^^^^^^^^^^^^ help: remove the condition
+  |
+  = note: no expected values for `feature`
+  = help: consider adding `client` as a feature in `Cargo.toml`
+  = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+  = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:495:15
+    |
+495 |         #[cfg(target_os = "solana")]
+    |               ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+note: the lint level is defined here
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:9:9
+    |
+  9 | #![warn(unexpected_cfgs)]
+    |         ^^^^^^^^^^^^^^^
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:501:19
+    |
+501 |         #[cfg(not(target_os = "solana"))]
+    |                   ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:513:15
+    |
+513 |         #[cfg(target_os = "solana")]
+    |               ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:519:19
+    |
+519 |         #[cfg(not(target_os = "solana"))]
+    |                   ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:531:15
+    |
+531 |         #[cfg(target_os = "solana")]
+    |               ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256k1.rs:538:19
+    |
+538 |         #[cfg(not(target_os = "solana"))]
+    |                   ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:588:15
+    |
+588 |         #[cfg(target_os = "solana")]
+    |               ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+note: the lint level is defined here
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:9:9
+    |
+  9 | #![warn(unexpected_cfgs)]
+    |         ^^^^^^^^^^^^^^^
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:594:19
+    |
+594 |         #[cfg(not(target_os = "solana"))]
+    |                   ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:819:15
+    |
+819 |         #[cfg(target_os = "solana")]
+    |               ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:825:19
+    |
+825 |         #[cfg(not(target_os = "solana"))]
+    |                   ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:906:15
+    |
+906 |         #[cfg(target_os = "solana")]
+    |               ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unexpected `cfg` condition value: `solana`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:912:19
+    |
+912 |         #[cfg(not(target_os = "solana"))]
+    |                   ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+
+warning: unused variable: `data`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:580:9
+    |
+580 |     let data: &[&[u8]] = &[
+    |         ^^^^ help: if this is intentional, prefix it with an underscore: `_data`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:579:9
+    |
+579 |     let mut hash = MaybeUninit::<[u8; 32]>::uninit();
+    |         ----^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `client_data_json`
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:813:9
+    |
+813 |     let client_data_json =
+    |         ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_client_data_json`
+
+warning: unnecessary `unsafe` block
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:818:5
+    |
+818 |     unsafe {
+    |     ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:817:9
+    |
+817 |     let mut client_data_hash = [0u8; 32];
+    |         ----^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unnecessary `unsafe` block
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:905:5
+    |
+905 |     unsafe {
+    |     ^^^^^^ unnecessary `unsafe` block
+
+warning: variable does not need to be mutable
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:904:9
+    |
+904 |     let mut client_data_hash = [0u8; 32];
+    |         ----^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: function `generate_client_data_json` is never used
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/src/authority/secp256r1.rs:669:4
+    |
+669 | fn generate_client_data_json(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `swig-state` (lib) generated 22 warnings (run `cargo fix --lib -p swig-state` to apply 4 suggestions)
+warning: swig@3.0.0: IDL written to: /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/idl.json
+warning: unused doc comment
+  --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/lib.rs:42:1
+   |
+42 | /// Program ID for the Swig wallet program
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+   |
+   = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+   = note: `#[warn(unused_doc_comments)]` (part of `#[warn(unused)]`) on by default
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/actions/add_authority_v1.rs:237:23
+    |
+237 |     ctx.accounts.swig.realloc(account_size, false)?;
+    |                       ^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/actions/remove_authority_v1.rs:232:23
+    |
+232 |     ctx.accounts.swig.realloc(new_size, false)?;
+    |                       ^^^^^^^
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/actions/update_authority_v1.rs:515:22
+    |
+515 |         swig_account.realloc(aligned_size, false)?;
+    |                      ^^^^^^^
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/actions/update_authority_v1.rs:836:27
+    |
+836 |         ctx.accounts.swig.realloc(aligned_size, false)?;
+    |                           ^^^^^^^
+
+warning: unnecessary `unsafe` block
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/actions/transfer_assets_v1.rs:271:26
+    |
+271 |             let amount = unsafe {
+    |                          ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `segment_count` is never read
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/util/mod.rs:427:13
+    |
+427 |     let mut segment_count = 0;
+    |             ^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `segment_count` is never read
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/util/mod.rs:438:9
+    |
+438 |         segment_count += 1;
+    |         ^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: value assigned to `segment_count` is never read
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/src/util/mod.rs:453:13
+    |
+453 |             segment_count += 1;
+    |             ^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: `swig` (lib) generated 9 warnings
+   Compiling swig-interface v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/interface)
+warning: variable does not need to be mutable
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/interface/src/lib.rs:789:9
+    |
+789 |         mut authority_payload_fn: F,
+    |         ----^^^^^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/interface/src/lib.rs:880:9
+    |
+880 |         mut authority_payload_fn: F,
+    |         ----^^^^^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: `swig-interface` (lib) generated 2 warnings (run `cargo fix --lib -p swig-interface` to apply 2 suggestions)
+   Compiling binarylock-swig-gate v0.1.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/adapter)
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `binarylock-swig-gate` (lib) generated 4 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.62s
+     Running tests/real_swig_payload.rs (adapter/target/debug/deps/real_swig_payload-47db356fd13fe72b)
+
+running 5 tests
+binarylock-swig: inner target does not match policy
+test rejects_a_second_real_swig_call_that_could_reuse_the_first_proof ... ok
+test rejects_a_non_swig_instruction_even_if_it_mentions_the_target ... ok
+test rejects_reusing_the_proof_with_another_inner_target ... ok
+test accepts_the_real_swig_builder_payload_for_the_pinned_target ... ok
+test rejects_explicit_earlier_proof_indices_from_the_real_swig_builder ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

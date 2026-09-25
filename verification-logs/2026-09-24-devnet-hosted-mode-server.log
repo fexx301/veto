@@ -1,0 +1,4 @@
+Logging to /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/verification-logs/devnet-operator-20260924T145852Z.log
+Veto operator UI ready at http://127.0.0.1:4173 (hosted); target=Ejm686FUtJiuuYdWPMT4JNVaZopMFb8pYamfXJ9jPa2N
+./adapter/scripts/run-devnet-operator.sh: line 32: 40286 Terminated: 15          env OPERATOR_PUBKEY="$OPERATOR_PUBKEY" RPC_URL="https://api.devnet.solana.com" HUMAN_PATH="$DIR/deployer.json" AGENT_PATH="$DIR/agent.json" PROTOCOL_PATH="$DIR/protocol.json" GATE_ID="$GATE_ID" PAY_ID="$PAY_ID" PAY_KEYPAIR="$DIR/pay.json" PAY_V1_SO="$PAY_DEPLOY/merchant_pay_v1.so" PAY_V2_SO="$PAY_DEPLOY/merchant_pay_v2.so" SOLANA_BIN="$SOLANA_TOOLS/solana" "$ROOT/adapter/target/debug/operator_server" 2>&1
+     40287 Done                    | tee "$LOG"

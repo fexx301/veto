@@ -1,0 +1,20 @@
+Operator UI packaging verification — 2026-09-23
+
+Command: ./adapter/scripts/run-local-demo.sh --operator-smoke
+Result: exit 0; 6 host tests passed; all five local HTTP actions passed; stale
+        transaction rejected with Custom(4), counter stayed at 1, reapproval
+        restored execution, final counter 2; output: operator-demo-run.log.
+
+Command: cargo fmt --manifest-path adapter/Cargo.toml --all -- --check
+Result: exit 0. Stable rustfmt warned that repository-configured nightly-only
+        formatting options are unavailable; no formatting diff was reported.
+
+Command: bash -n adapter/scripts/run-local-demo.sh
+Result: exit 0.
+
+Command: git diff --check
+Result: exit 0.
+
+The browser rehearsal output is in operator-browser-check.log. It used
+Playwright 1.61.0 and Chrome 153.0.8010.53; the executed browser flow and
+viewport results are summarized in verification-logs/README.md.

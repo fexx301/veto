@@ -1,0 +1,18 @@
+Validator binary: /Users/femi/.local/share/solana/install/active_release/bin/solana-test-validator
+Local RPC/faucet: http://127.0.0.1:8899 / 9900
+Feature set source: https://api.devnet.solana.com (read-only clone-feature-set)
+
+First validator ledger: /tmp/veto-swig-validator.fVNUAx
+Second clean validator ledger used for final run: /tmp/veto-swig-validator-rerun.7AsHBR
+
+Launch arguments for each fresh ledger:
+--reset --clone-feature-set --url https://api.devnet.solana.com --rpc-port 8899 --faucet-port 9900
+--upgradeable-program 22zNjxk9cSCWUB7FW85z1v2pQzAkYYobSrWxL2qatgC5 target/deploy/swig.so adapter/runtime-human.json
+--upgradeable-program G1uYbHAbmYoS4yom6MmmMfSt78tXNtPHMVfZBQ1jv5J7 adapter/target/deploy/binarylock_swig_gate.so adapter/runtime-human.json
+--upgradeable-program 5Nmr67T9jqUh1s9iU5ghABUFt8jMoG3REBZFwiioTMo3 ../binarylock/onchain/target-program/target/sbpfv3-solana-solana/release/binarylock_target.so adapter/runtime-human.json
+--bpf-program BXAu5ZWHnGun2XZjUZ9nqwiZ5dNVmofPGYdMC4rx4qLV target/deploy/test_program_authority.so
+
+Disposable local-key airdrops before each clean run:
+solana airdrop 10 CpnzXrZarJH1qJoLjCif27qv4mvdBEiry6d1UNmQ284t --url http://127.0.0.1:8899
+solana airdrop 10 AfeXGRRTaKLy242tea1sfDxtv1yXhySDBgE8re2RRZyo --url http://127.0.0.1:8899
+Cross-wallet adversarial ledger: /tmp/veto-swig-crosswallet.4rpNGB

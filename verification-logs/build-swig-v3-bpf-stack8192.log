@@ -1,0 +1,131 @@
+warning: /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/Cargo.toml: Found `feature = ...` in `target.'cfg(...)'.dependencies`. This key is not supported for selecting dependencies and will not work as expected. Use the [features] section instead: https://doc.rust-lang.org/cargo/reference/features.html
+   Compiling five8_core v0.1.2
+   Compiling typenum v1.18.0
+   Compiling generic-array v0.14.7
+   Compiling pinocchio v0.9.0
+   Compiling sha2-const-stable v0.1.0
+   Compiling serde_core v1.0.228
+   Compiling crunchy v0.2.3
+   Compiling serde v1.0.228
+   Compiling rand_core v0.6.4
+   Compiling subtle v2.6.1
+   Compiling libsecp256k1 v0.7.2
+   Compiling base64 v0.22.1
+   Compiling arrayref v0.3.9
+   Compiling pinocchio v0.8.1
+   Compiling murmur3 v0.5.2
+   Compiling five8_const v0.1.4
+   Compiling rand v0.8.5
+   Compiling bs58 v0.5.1
+   Compiling bytemuck v1.25.0
+   Compiling pinocchio-pubkey v0.3.0
+   Compiling pinocchio-pubkey v0.2.4
+   Compiling num_enum v0.7.6
+   Compiling pinocchio-token v0.3.0
+   Compiling pinocchio-system v0.3.0
+   Compiling shank v0.4.2 (https://github.com/anagrambuild/shank.git#d4f046b2)
+   Compiling swig v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program)
+   Compiling static_assertions v1.1.0
+   Compiling solana-security-txt v1.1.1
+   Compiling swig-assertions v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/assertions)
+   Compiling swig-compact-instructions v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/instructions)
+   Compiling digest v0.9.0
+   Compiling libsecp256k1-core v0.3.0
+   Compiling swig-state v3.0.0 (/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state)
+warning: unused import: `no_padding::NoPadding`
+ --> state/src/action/program_all.rs:7:5
+  |
+7 | use no_padding::NoPadding;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unexpected `cfg` condition value: `client`
+ --> state/src/authority/ed25519.rs:9:7
+  |
+9 | #[cfg(feature = "client")]
+  |       ^^^^^^^^^^^^^^^^^^ help: remove the condition
+  |
+  = note: no expected values for `feature`
+  = help: consider adding `client` as a feature in `Cargo.toml`
+  = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+  = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: function `generate_client_data_json` is never used
+   --> state/src/authority/secp256r1.rs:669:4
+    |
+669 | fn generate_client_data_json(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `swig-state` (lib) generated 3 warnings (run `cargo fix --lib -p swig-state` to apply 1 suggestion)
+warning: swig@3.0.0: IDL written to: /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/program/idl.json
+warning: use of deprecated macro `lazy_entrypoint`: Use the `lazy_program_entrypoint!` macro instead
+  --> program/src/lib.rs:57:1
+   |
+57 | lazy_entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: unused doc comment
+  --> program/src/lib.rs:42:1
+   |
+42 | /// Program ID for the Swig wallet program
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+   |
+   = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+   = note: `#[warn(unused_doc_comments)]` on by default
+
+warning: use of deprecated macro `pinocchio::lazy_entrypoint`: Use the `lazy_program_entrypoint!` macro instead
+  --> program/src/lib.rs:18:16
+   |
+18 | use pinocchio::lazy_entrypoint;
+   |                ^^^^^^^^^^^^^^^
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> program/src/actions/add_authority_v1.rs:237:23
+    |
+237 |     ctx.accounts.swig.realloc(account_size, false)?;
+    |                       ^^^^^^^
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> program/src/actions/remove_authority_v1.rs:232:23
+    |
+232 |     ctx.accounts.swig.realloc(new_size, false)?;
+    |                       ^^^^^^^
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> program/src/actions/update_authority_v1.rs:515:22
+    |
+515 |         swig_account.realloc(aligned_size, false)?;
+    |                      ^^^^^^^
+
+warning: use of deprecated method `pinocchio::account_info::AccountInfo::realloc`: Use AccountInfo::resize() instead
+   --> program/src/actions/update_authority_v1.rs:836:27
+    |
+836 |         ctx.accounts.swig.realloc(aligned_size, false)?;
+    |                           ^^^^^^^
+
+warning: unnecessary `unsafe` block
+   --> program/src/actions/transfer_assets_v1.rs:271:26
+    |
+271 |             let amount = unsafe {
+    |                          ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` on by default
+
+warning: value assigned to `segment_count` is never read
+   --> program/src/util/mod.rs:427:13
+    |
+427 |     let mut segment_count = 0;
+    |             ^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` on by default
+
+Error: Function _ZN25swig_compact_instructions38InstructionIterator$LT$AL$C$RK$C$P$GT$22parse_next_instruction17h8ac093ae84a32263E overflows the maximum allowed frame space by accessing an offset 2176 bytes greater than the maximum of 4096. Please, minimize large stack variables. Estimated function frame size: 6272 bytes. Exceeding the maximum stack offset may cause undefined behavior during execution.
+
+warning: `swig` (lib) generated 9 warnings
+    Finished `release` profile [optimized] target(s) in 8.81s

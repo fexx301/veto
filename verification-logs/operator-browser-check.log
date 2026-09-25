@@ -1,0 +1,9 @@
+viewport=320 document=320 body=320 maxButton=44
+viewport=375 document=375 body=375 maxButton=44
+viewport=414 document=414 body=414 maxButton=44
+viewport=768 document=768 body=768 maxButton=44
+viewport=1280 document=1280 body=1280 maxButton=44
+viewport=1440 document=1440 body=1440 maxButton=44
+firstFoldReadout=735 firstFoldAction=698 contrastPairs=8
+actions=5 ledger=5 counter=2 keyboard=all copy=announced disconnected=safe pageErrors=0
+assertions=pending-controls-disabled post-error-persisted offline-map-neutral empty-copy-disabled offline-posts-zero

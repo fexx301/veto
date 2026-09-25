@@ -1,0 +1,8 @@
+warning: /Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration/state/Cargo.toml: Found `feature = ...` in `target.'cfg(...)'.dependencies`. This key is not supported for selecting dependencies and will not work as expected. Use the [features] section instead: https://doc.rust-lang.org/cargo/reference/features.html
+error: failed to run `rustc` to learn about target-specific information
+
+Caused by:
+  process didn't exit successfully: `/Users/femi/.rustup/toolchains/1.89.0-sbpf-solana-v1.54/bin/rustc - --crate-name ___ --print=file-names -Zremap-cwd-prefix= -C llvm-args=-sbf-stack-size=8192 --target sbpfv3-solana-solana --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)
+  --- stderr
+  rustc -Cllvm-args="..." with: Unknown command line argument '-sbf-stack-size=8192'.  Try: 'rustc -Cllvm-args="..." with --help'
+  rustc -Cllvm-args="..." with: Did you mean '--bpf-stack-size=8192'?

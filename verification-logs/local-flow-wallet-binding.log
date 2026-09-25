@@ -1,0 +1,17 @@
+swig-fixture program=22zNjxk9cSCWUB7FW85z1v2pQzAkYYobSrWxL2qatgC5 config=BAGSi4P83Yw7AHFSQ6JZ735n35DqPhoKfY9ETu7Nho9n config-bump=255 wallet=H1GFCvox1sMgaKFy6VfrMuiDfJrocDt5MDv75fWRHnST wallet-bump=253
+wrong-config-reapproval-rejected custom=12 wrong-wallet-reapproval-rejected custom=13
+policy-substitution-rejected error=InstructionError(1, Custom(3035)) counter=0
+agent-reapproval-rejected custom=2 slot=0
+before-upgrade slot=0 counter=1
+substitution-rejected custom=7 counter=1
+loader-upgrade=Program Id: 5Nmr67T9jqUh1s9iU5ghABUFt8jMoG3REBZFwiioTMo3
+
+Signature: 4j8Pw9wAo32SupRD69fj5LjSrBkRFApzocN69cKiUwcEac1F6tqDXkc6jVe1vNGGhbitXXUFPBxBn48n7ogLkELe
+loader-upgraded old-slot=0 new-slot=101
+stale-deployment-rejected custom=4 counter=1
+human-reapproved slot=101 counter=2
+top-level-proof-reuse-rejected custom=10 counter=2
+nested-cpi-proof-reuse-rejected-by-swig custom=8 counter=2
+cross-wallet-policy-reuse-rejected custom=12 counter=2
+cross-wallet-proof-account-substitution-rejected custom=12 counter=2
+complete-flow-passed
