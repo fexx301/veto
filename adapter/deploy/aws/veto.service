@@ -1,0 +1,21 @@
+[Unit]
+Description=Veto operator console (devnet demo)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=veto
+Group=veto
+EnvironmentFile=/etc/veto.env
+Environment=HOME=/var/lib/veto
+ExecStart=/opt/veto/operator_server
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/veto
+
+[Install]
+WantedBy=multi-user.target
