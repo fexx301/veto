@@ -1,0 +1,8 @@
+target/
+node_modules/
+*.so
+.DS_Store
+adapter/runtime-*.json
+adapter/runtime-ledger-*
+adapter/verification-output/
+test-ledger/
