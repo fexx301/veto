@@ -275,4 +275,4 @@ An external read-only review raised findings on Veto and on the Swig code in the
 - **Opaque signing.** The wallet bridge and standalone signer refuse approvals in which the operator pays the fee, is writable, or is not a required signer (unit tests in `external_operator_signer`).
 - **No CI.** `.github/workflows/ci.yml` runs host tests, client builds, a bundle-freshness check and SBF builds.
 
-Logs: `2026-09-26-review-fix-*`. The Swig findings from the same review (ProgramScope cache, SDK signers and odometers, CLI key storage, zero-window limits, session replacement policy) concern upstream Swig code, which Veto neither vendors nor uses in those paths.
+Logs: `2026-09-26-review-fix-*`. The remaining findings from the same review concern upstream Swig code, which Veto neither vendors nor uses in the affected paths; they were handled with the Swig maintainers separately.
