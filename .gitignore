@@ -6,3 +6,4 @@ adapter/runtime-*.json
 adapter/runtime-ledger-*
 adapter/verification-output/
 test-ledger/
+verification-logs/runs/

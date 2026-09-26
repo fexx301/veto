@@ -41,7 +41,8 @@ for port in "$VETO_PORT" 8899; do
   fi
 done
 WORK="$(mktemp -d /tmp/veto-demo.XXXXXX)"
-OUTPUT="$ROOT/verification-logs"
+# Untracked; copy logs worth keeping into verification-logs/ deliberately.
+OUTPUT="$ROOT/verification-logs/runs"
 RUN_LOG="$OUTPUT/$RUN_LOG_MODE-demo-run.log"
 VALIDATOR_LOG="$OUTPUT/$RUN_LOG_MODE-demo-validator.log"
 VALIDATOR_PID=""
