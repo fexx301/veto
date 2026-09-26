@@ -95,6 +95,13 @@ function renderStatus(data) {
   document.getElementById("state-chip").textContent = headline[1];
   document.getElementById("header-phase").textContent = headline[1];
   showAddress("operator-id", data.operator);
+  // A demo-operator run is approved by the server's test key, not the visitor.
+  const demoOperator = data.externalOperator === false;
+  document.querySelector("#node-human .node-name").textContent = demoOperator ? "Demo operator" : "Your wallet";
+  document.querySelector("#node-human .node-role").textContent = demoOperator ? "Server test key · sole approver" : "Wallet root · sole approver";
+  document.querySelector('[data-step="reapprove"] .step-copy').textContent = demoOperator
+    ? "The code matches the build you reviewed. The demo operator's test key signs; with your own wallet, you would."
+    : "The code matches the build you reviewed. Your wallet signs.";
   ["target-id", "target-ledger"].forEach((id) => showAddress(id, data.target));
   ["swig-config", "swig-ledger"].forEach((id) => showAddress(id, data.swigConfig));
   ["policy-id", "policy-ledger"].forEach((id) => showAddress(id, data.policy));
