@@ -539,6 +539,7 @@ impl DemoState {
         Ok(json!({
             "transaction": encoded,
             "operator": run.operator.to_string(),
+            "gate": shared.gate.to_string(),
             "target": shared.target.to_string(),
             "policy": run.policy.pubkey().to_string(),
             "reviewedSlot": reviewed_slot,

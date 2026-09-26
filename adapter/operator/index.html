@@ -464,7 +464,7 @@
       const preparedResponse = await fetch("/api/operator/approval-transaction", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
       const prepared = await preparedResponse.json();
       if (!preparedResponse.ok) throw new Error(prepared.error || "Could not prepare the approval transaction.");
-      const signed = await VetoWallet.signApproval(prepared.transaction, prepared.operator);
+      const signed = await VetoWallet.signApproval(prepared.transaction, prepared.operator, prepared.gate);
       const submitResponse = await fetch("/api/operator/submit-approval", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ transaction: signed }) });
       const data = await submitResponse.json();
       if (!submitResponse.ok) throw new Error(data.error || "Signed approval was rejected.");

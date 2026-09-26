@@ -276,14 +276,14 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
     [[ "${UNSIGNED_RESULT##*$'\n'}" == "409" ]]
 
     if "$ROOT/adapter/target/debug/external_operator_signer" \
-      "$WORK/agent.json" "$PREPARED_TX" >"$WORK/wrong-signer.out" 2>"$WORK/wrong-signer.err"; then
+      "$WORK/agent.json" "$PREPARED_TX" "$GATE_ID" >"$WORK/wrong-signer.out" 2>"$WORK/wrong-signer.err"; then
       echo "agent unexpectedly signed the operator transaction" >&2
       exit 1
     fi
     grep -q 'not a required signer' "$WORK/wrong-signer.err"
     echo "agent-signature-rejected"
 
-    SIGNED_TX="$("$ROOT/adapter/target/debug/external_operator_signer" "$WORK/operator.json" "$PREPARED_TX")"
+    SIGNED_TX="$("$ROOT/adapter/target/debug/external_operator_signer" "$WORK/operator.json" "$PREPARED_TX" "$GATE_ID")"
     SIGNED_PAYLOAD="$(transaction_payload <<<"$SIGNED_TX")"
     INITIALIZED_RESULT="$(submit_approval "$SIGNED_PAYLOAD")"
     printf 'external-initialize=%s\n' "$INITIALIZED_RESULT"
@@ -350,14 +350,14 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
     REAPPROVAL="$(prepare_approval)"
     REAPPROVAL_TX="$(transaction_from_json <<<"$REAPPROVAL")"
     if "$ROOT/adapter/target/debug/external_operator_signer" \
-      "$WORK/agent.json" "$REAPPROVAL_TX" >"$WORK/wrong-reapproval.out" 2>"$WORK/wrong-reapproval.err"; then
+      "$WORK/agent.json" "$REAPPROVAL_TX" "$GATE_ID" >"$WORK/wrong-reapproval.out" 2>"$WORK/wrong-reapproval.err"; then
       echo "agent unexpectedly signed the reapproval transaction" >&2
       exit 1
     fi
     grep -q 'not a required signer' "$WORK/wrong-reapproval.err"
     echo "agent-reapproval-rejected"
 
-    SIGNED_REAPPROVAL="$("$ROOT/adapter/target/debug/external_operator_signer" "$WORK/operator.json" "$REAPPROVAL_TX")"
+    SIGNED_REAPPROVAL="$("$ROOT/adapter/target/debug/external_operator_signer" "$WORK/operator.json" "$REAPPROVAL_TX" "$GATE_ID")"
     REAPPROVAL_PAYLOAD="$(transaction_payload <<<"$SIGNED_REAPPROVAL")"
     REAPPROVED_RESULT="$(submit_approval "$REAPPROVAL_PAYLOAD")"
     printf 'external-reapprove=%s\n' "$REAPPROVED_RESULT"
