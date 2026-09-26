@@ -297,3 +297,20 @@ A second external review of this repository (source review plus an offline signi
 Verified end to end: `--external-operator-smoke` (real setup and reapproval transactions accepted by the stricter signer; agent-key signing still refused), `--external-operator-browser`, and `--operator-smoke`. Logs: `2026-09-26-followup-fix-*`.
 
 Remaining assurance gaps, as the reviewer noted: CI does not run the local-validator or browser flows (they run locally through the runner), and independent source-to-deployed-byte reproduction of the gate is not set up.
+
+## Third review fixes — 2026-09-27
+
+A third external review (static, covering Veto and the earlier Swig checkout) raised findings on Veto's server, deployment, gate and documentation. Fixed, each as its own commit:
+
+- **Server.** Socket write timeout and no state lock held while writing a response; per-client limit of 4 hosted runs an hour inside the global limit (client address from the proxy's `X-Forwarded-For`, trusted only from loopback; unit-tested); a visitor cannot name the server's own key as operator; loader-upgrade output kept out of client errors; overflow checks on in release builds.
+- **Deployment.** Host names, program IDs and the RPC URL are validated before they reach the remote shell, `/etc/veto.env` or the Caddyfile; Caddy sends HSTS; the systemd unit gains a restart limit, `UMask=0077`, an empty capability set, `ProtectProc=invisible`, a system-call filter and memory/task caps; key-generating scripts use `umask 077`; `.gitignore` excludes key files.
+- **Reviewed build.** The SHA-256 of the merchant-pay v1/v2 builds shipped to the hosted demo is committed (`adapter/fixtures/merchant-pay/builds.sha256`) and checked by `push.sh` and `provision.sh`; build scripts fail if v1 and v2 are identical.
+- **Gate.** `check_route` now fails closed on a loader-owned account that does not decode; policy layout constants are exported to the clients.
+- **Gate upgrade key.** On devnet the gate's upgrade authority was the deployer key, which the hosted server also holds. It was moved to a separate `gate-authority` key that `push.sh` never copies (`H21vqhFx…aB8`).
+- **Documentation.** The authority map now lists who holds each key per mode and what Veto does not constrain (the wallet root, the Swig program, the gate's own upgrade key); the READMEs state this next to their claims; the upgrade study's counts are marked as lower bounds (two Sanctum rows were undercounted); stale lines above are marked historical.
+
+Local suite on the changed gate (exit 0 each): regression `complete-flow-passed`, `--payment`, `--route`, `--operator-smoke` (`slow-client-cut-off-after=18s`), `--external-operator-smoke`, `--external-operator-browser` (7 actions, 0 page errors). Gate SBF v3 SHA-256 (macOS build) `a69858af…1297`. Logs: `2026-09-27-*.log`.
+
+Devnet: the gate `4okceHnZ…ShJq` was upgraded in place at slot 504576092; its deployed bytes match this build. The deploy script also redeployed merchant-pay v1.
+
+Not changed: the review's remaining findings concern upstream Swig code, which Veto neither vendors nor modifies. Veto trusts the Swig program to enforce `ProgramExec` and does not constrain a wallet root; both are stated in the authority map.

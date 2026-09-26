@@ -60,3 +60,7 @@ First complete run on the public URL (demo operator, cookie-owned run), full ser
 | Veto wallet pays 10 | [`4PVqgpj6Vv…`](https://explorer.solana.com/tx/4PVqgpj6Vv2cy7zx6Nvgkr4i7WL7TJdscCqQrhEVVsm9GcC1wrKG2CVjUc4x3yFdsfZzP4afQgpMmYwKub9vEMZW?cluster=devnet) | 490 → 480 |
 
 The downstream route demo (`--route`) has run locally and against the official Swig binary, not yet on devnet. A Phantom-signed run on the public URL is still pending.
+
+## Gate upgrade and separate upgrade key — 2026-09-27
+
+The route-pinning gate [`4okceHnZ…ShJq`](https://explorer.solana.com/address/4okceHnZABKcqadXLK57mkU87c4GAUKNsunr5LHHShJq?cluster=devnet) was upgraded in place with the third-review fixes (slot 504576092; deployed bytes match the local build `a69858af…1297`). Its upgrade authority moved from the deployer key, which the hosted server holds, to a separate key kept off the server: `H21vqhFxy3WR8nMm6MpyRcBxgCBy6hjn2ESvgB7mKaB8`. The gate is still not finalized.
