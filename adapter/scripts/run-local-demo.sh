@@ -239,7 +239,7 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
         "$OPERATOR_URL/api/action/$step"
     }
     prepare_approval() {
-      curl --fail --silent --show-error \
+      curl --fail-with-body --silent --show-error \
         --header "Origin: $OPERATOR_URL" \
         --header "Content-Type: application/json" \
         --request POST --data '{}' \
