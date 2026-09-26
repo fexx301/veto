@@ -141,6 +141,22 @@ fn required_var(name: &str) -> Result<String> {
     env::var(name).with_context(|| format!("missing {name}"))
 }
 
+/// A cluster name for the public status. The RPC URL itself is never
+/// returned, since a provider URL can carry an API key.
+fn network_label(rpc_url: &str) -> &'static str {
+    if rpc_url.contains("devnet") {
+        "devnet"
+    } else if rpc_url.contains("testnet") {
+        "testnet"
+    } else if rpc_url.contains("mainnet") {
+        "mainnet"
+    } else if rpc_url.contains("127.0.0.1") || rpc_url.contains("localhost") {
+        "localnet"
+    } else {
+        "custom"
+    }
+}
+
 /// An unguessable run token: the address of a fresh random keypair.
 fn new_token() -> String {
     Keypair::new().pubkey().to_string()
@@ -413,7 +429,7 @@ impl DemoState {
         let (current_slot, current_hash) = deployment_snapshot(&shared.rpc, &shared.target)?;
         let mut status = json!({
             "hosted": shared.hosted,
-            "rpcUrl": shared.rpc_url,
+            "network": network_label(&shared.rpc_url),
             "target": shared.target.to_string(),
             "agent": shared.agent.pubkey().to_string(),
             "mint": shared.mint.to_string(),

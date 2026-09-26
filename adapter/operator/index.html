@@ -261,7 +261,7 @@
     }
 
     function explorerUrl(kind, value) {
-      if (!/devnet/.test(lastStatus?.rpcUrl || "") || !value) return "";
+      if (lastStatus?.network !== "devnet" || !value) return "";
       return "https://explorer.solana.com/" + kind + "/" + value + "?cluster=devnet";
     }
 
@@ -357,7 +357,7 @@
       document.getElementById("code-hash").textContent = "sha256 " + (data.currentCodeHash ? data.currentCodeHash.slice(0, 12) + "…" : "—");
       document.getElementById("code-hash").title = data.currentCodeHash || "";
       document.getElementById("cell-code").dataset.status = matches ? "" : "mismatch";
-      const onDevnet = /devnet/.test(data.rpcUrl || "");
+      const onDevnet = data.network === "devnet";
       document.getElementById("connection-copy").textContent = onDevnet ? "Solana devnet" : "Local validator";
       document.getElementById("footer-network").textContent = onDevnet ? "Solana devnet demo" : "local validator demo";
       document.getElementById("network-label").textContent = onDevnet ? "Live devnet state" : "Live local state";
