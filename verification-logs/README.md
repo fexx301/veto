@@ -256,3 +256,15 @@ fixture: nested CPI rejected by Swig `Custom(8)`), `--payment`, `--route`
 `--operator-smoke`. Logs: `2026-09-25-standalone-*`. The standalone gate build
 is byte-identical to the gate deployed on devnet at
 `4okceHnZABKcqadXLK57mkU87c4GAUKNsunr5LHHShJq` (SHA-256 `acc3073f…93ad`).
+
+## External review fixes — 2026-09-26
+
+An external read-only review raised findings on Veto and on the Swig code in the earlier checkout. The Veto findings were fixed:
+
+- **Approving unreviewed code.** Approval paths relied on the page phase; the server did not re-check the code hash, and read slot and hash separately. Every approval path (wallet-signed and server-signed) now reads slot and hash from one ProgramData snapshot and refuses on a mismatch; the page disables approval on a mismatch. Regression: `--external-operator-smoke` upgrades merchant-pay out-of-band while the phase is "fixed" and requires the approval request to be refused (`out-of-band-unreviewed-approval-refused`).
+- **RPC URL in public status.** `/api/status` now returns a network name, not the RPC URL.
+- **Slow requests.** 10-second total request deadline and at most 64 concurrent connections (503 beyond); `--operator-smoke` checks that a client trickling one byte every 3 seconds is cut off (`slow-client-cut-off-after=18s`, versus the 60 s it would otherwise hold).
+- **Opaque signing.** The wallet bridge and standalone signer refuse approvals in which the operator pays the fee, is writable, or is not a required signer (unit tests in `external_operator_signer`).
+- **No CI.** `.github/workflows/ci.yml` runs host tests, client builds, a bundle-freshness check and SBF builds.
+
+Logs: `2026-09-26-review-fix-*`. The Swig findings from the same review (ProgramScope cache, SDK signers and odometers, CLI key storage, zero-window limits, session replacement policy) concern upstream Swig code, which Veto neither vendors nor uses in those paths.
