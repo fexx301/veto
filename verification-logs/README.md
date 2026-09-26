@@ -2,6 +2,13 @@
 
 Checkout: `/Users/femi/Documents/IdeaCenter/spikes/binarylock-swig-integration`
 
+> **Reading this file.** Sections are chronological and each describes the code
+> as it was on that date. The early sections ran in the original Swig
+> worktree named above, before this repository was split out, so their paths
+> (for example `../binarylock/...`) and layout values (for example
+> `POLICY_LEN=201`, before route pinning made it 522) are historical. Later
+> sections supersede earlier ones; the current state is at the end.
+
 Branch `binarylock-swig-integration`, Swig source HEAD `3e0411f0c2980b26296903eaa4aa0c2d07869316`. Local SBF tools were installed at `/Users/femi/.local/share/solana/install/active_release/bin/`; they were absent from the prior shell `PATH`, not absent from the machine. Versions: Agave/validator 4.2.1, `cargo-build-sbf` 4.1.0, platform-tools v1.54, Rust 1.89.0.
 
 The unmodified Swig compact-instruction parser's `MAX_ACCOUNTS=254` creates a 6,272-byte SBF frame in `InstructionIterator::parse_next_instruction`; its ordinary v3 artifact failed at runtime with an SBF stack access violation. For the disposable local Swig artifact only, `instructions/src/lib.rs` was temporarily capped at 64 entries, which compiled without the frame warning. This does not alter Swig authorization or SignV2 code. The constant and temporary Swig/assertion program-ID edits were restored after the artifact was built. Thus this was a local build of the inspected Swig source, not a byte-for-byte official release artifact. The tested wallet flows did not exercise high account-count behavior.
@@ -144,8 +151,10 @@ validator run executed a genuine loader upgrade from slot `0` to `20`, then
 submitted a reapproval carrying reviewed slot `0`; it failed with `Custom(14)`
 and the policy remained pinned to slot `0`. The ordinary stale action still
 failed with `Custom(4)`, and correct operator reapproval restored execution.
-Output: `regression-demo-run.log`. Current Veto gate SBF v3 SHA-256:
-`7363f964812e9a57ac15d6d678e712edf46cf16ed81a0b406743b8c9659ff254`.
+Output: `regression-demo-run.log` (later overwritten; see the F1–F3 section).
+Veto gate SBF v3 SHA-256 at the time:
+`7363f964812e9a57ac15d6d678e712edf46cf16ed81a0b406743b8c9659ff254`; no
+surviving log records this hash.
 
 The loopback server can now prepare and fee-pay an approval transaction whose
 other required signer is a configured external operator. It compares a
@@ -223,7 +232,7 @@ Setup: two Swig wallets, both with the operator key as root and a 500-token budg
 
 Merchant-pay builds (`adapter/fixtures/merchant-pay`, same source; `--features drain` builds v2): v1 file SHA-256 `82e1121a…0aaa`, v2 `706f7cd9…c9da`. The code hash printed by the flow is SHA-256 of the executable with trailing zero padding removed, computed identically for the file and for the deployed ProgramData bytes after loader metadata (v1 `4d728ca2…0045`, v2 `abb80f46…991d`). This is a local reviewed-build comparison, not `solana-verify` output or a reproducible-build attestation.
 
-Limits: v2 is a deliberately malicious fixture written for this demo, not a replayed real incident. Swig's `TokenLimit` bounded the plain wallet's loss to its remaining budget; Veto's contribution is that unreviewed code could not spend any of it. The Veto wallet's protection covers the direct first-hop call; merchant-pay's own CPI to SPL Token is inside the approved code.
+Limits: v2 is a deliberately malicious fixture written for this demo, not a replayed real incident. In this configuration (one agent role with `TokenLimit`), Swig's limit bounded the plain wallet's loss to its remaining budget; Veto's contribution is that unreviewed code could not spend any of it. At this date the Veto wallet's protection covered the direct first-hop call only; route-wide pinning (2026-09-25, below) extended it to every program the call can reach, including SPL Token.
 
 ## Operator console on the payment scenario — 2026-09-24
 

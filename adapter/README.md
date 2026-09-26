@@ -101,11 +101,20 @@ payment, the malicious upgrade, the blocked payment, the redeploy of the
 reviewed build, your reapproval, and the resumed payment.
 
 The server binds only to loopback, accepts same-origin POSTs, and prepares and
-fee-pays transactions with fresh temporary keys. It does not hold the operator
-key, so it cannot approve a deployment or change the protected wallet's roles.
-It holds the agent key, the comparison wallet's root, and the fixture's
-upgrade key (standing in for the protocol team). It refuses to prepare an
-approval while the deployed code differs from the reviewed build.
+fee-pays transactions with fresh temporary keys. In this mode it does not hold
+the operator key, so it cannot approve a deployment or change the protected
+wallet's roles. It holds the agent key, the comparison wallet's root, and the
+fixture's upgrade key (standing in for the protocol team). Locally it also
+holds the upgrade keys of the Veto gate and test fixtures, which a local
+validator needs; on devnet the gate's upgrade key stays off the hosted server.
+It refuses to prepare an approval while the deployed code differs from the
+reviewed build.
+
+The hosted demo (https://veto-demo.duckdns.org) works the same way when you
+connect your own devnet wallet. If you choose the demo operator instead, the
+server's test key is the wallet root and signs the approvals, so that run shows
+the mechanism, not operator ownership. See [AUTHORITY-MAP.md](AUTHORITY-MAP.md)
+for who holds each key.
 
 Checks without a manual wallet:
 

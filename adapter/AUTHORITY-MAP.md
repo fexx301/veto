@@ -5,19 +5,46 @@ Prepared 2026-09-24 from source inspection of this checkout (Swig commit
 read-only public RPC queries. Findings marked **source inference** have not
 been executed as an attack; findings marked **executed** have log evidence.
 
-## Who controls what in the current local demo
+## Who controls what
 
-| Authority | Held by (local demo) | Can do | Source |
+Updated 2026-09-27. "Operator" is the wallet that approves deployments: the
+visitor's wallet in hosted and `--operator` runs, or the server's test key in
+the scripted local runs and hosted demo-operator runs.
+
+| Authority | Held by | Can do | Source |
 |---|---|---|---|
-| Swig root role (Ed25519, `All`) | Server `human` key | Sign any wallet action, add/remove/replace roles, remove Veto's role | `operator_server.rs` `CreateInstruction::new(.., ClientAction::All)` |
+| Swig root role (Ed25519, `All`) | Operator (server `human`/setup key in scripted and demo-operator runs) | Sign any wallet action, add/remove/replace roles, remove Veto's role | `demo/payment.rs` `swig_create` |
 | Swig `ProgramExec` role (Veto) | Nobody (program-authenticated) | Call the approved target through the wallet when the preceding instruction is Veto `[2, policy]` for this config/wallet | `state/src/authority/programexec/mod.rs` |
-| "Agent" | Any key that pays the fee | Submit Veto proof + `SignV2` | `interface/src/lib.rs` `new_program_exec` (payer is only fee payer) |
-| Veto policy authority | External operator (Phantom) | Initialize policy; reapprove a new deployment slot | `adapter/src/lib.rs` `initialize`, `reapprove` |
-| Policy account creation | Server `human` key | Create the uninitialized policy account | `operator_server.rs` `create_account(.., &gate)` |
-| Target upgrade authority | Server `human` key | Upgrade the target program | `run-local-demo.sh` `--upgradeable-program .. human.json` |
-| Veto program upgrade authority | Server `human` key | Replace the Veto gate code | `run-local-demo.sh` |
-| Swig program upgrade authority (local) | Server `human` key | Replace the wallet program | `run-local-demo.sh` |
-| Fee payer / transaction preparer | Server `human` key | Pays fees; builds the approval transaction the operator signs | `prepare_operator_approval` |
+| Agent | Server `agent` key, stored in the policy | Submit the Veto proof + `SignV2`; the gate requires this key as signer | `adapter/src/lib.rs` `authorize_next_swig` |
+| Veto policy authority | Operator | Initialize the policy; reapprove a deployment; approve route programs | `adapter/src/lib.rs` `initialize`, `reapprove`, `approve_route_program` |
+| Policy account creation | Operator-signed setup transaction (policy key co-signs; server pays) | Create, initialize and bind the policy atomically | `demo/payment.rs` `setup_ixs` |
+| Merchant-pay upgrade authority | Server `protocol` key (stands in for the protocol team) | Upgrade the payment target | `run-local-demo.sh`, `deploy-devnet.sh` |
+| Counter, router, relay fixtures' upgrade authority (local) | Server `human` key | Upgrade those fixtures | `run-local-demo.sh` |
+| Veto gate upgrade authority | Local: server `human` key. Devnet: a `gate-authority` key never copied to the hosted server; not finalized | Replace the gate code | `run-local-demo.sh`, `deploy-devnet.sh` |
+| Swig program upgrade authority | Swig team (devnet program cloned by default); server `human` key only with `SWIG_SO` | Replace the wallet program | `run-local-demo.sh` |
+| Fee payer / transaction preparer | Server setup key | Pays fees; builds the approval transaction the operator signs | `prepare_operator_approval` |
+
+## What Veto does not constrain
+
+Veto constrains one delegated role: the agent's. It does not constrain the
+wallet's root. A root with `All` can sign a payment directly, add an unguarded
+role for the agent, or remove or replace the Veto role; Swig never consults
+Veto for those. Veto's guarantee therefore holds only while the root is a key
+the operator alone controls. In hosted runs with your own wallet that is your
+wallet; in scripted local runs and hosted demo-operator runs the server holds
+the root, so those runs demonstrate the mechanism, not operator ownership.
+
+Veto also trusts the programs it cannot pin itself:
+
+- **The Swig program.** Swig, not Veto, enforces that a `ProgramExec` role
+  needs Veto's preceding instruction. Pinning Swig's deployment slot in Veto
+  would not help: an upgraded Swig that stopped enforcing `ProgramExec` would
+  simply stop requiring Veto's instruction. Swig's upgrade authority is a
+  trust dependency, as for any Swig wallet.
+- **The Veto gate itself.** Whoever can upgrade the gate can replace its
+  checks while every Swig role keeps pointing at it. On devnet that key is
+  held off the hosted server; finalizing the gate would remove it entirely,
+  and is deferred so fixes can still be deployed.
 
 ## Findings
 

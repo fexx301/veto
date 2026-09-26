@@ -71,7 +71,10 @@ is not trusted implicitly. Only the operator's wallet, which is also the Swig
 wallet's root, can approve a deployment. An off-chain policy check could race
 an upgrade; Veto's check executes inside the transaction it protects.
 
-The trust boundary is documented in [`adapter/AUTHORITY-MAP.md`](adapter/AUTHORITY-MAP.md).
+Veto constrains the agent's delegated role, not the wallet's root: a root can
+still sign directly or change roles, so the guarantee holds while the root is
+the operator's own wallet. It also relies on the Swig program to enforce
+`ProgramExec`. The full trust boundary is in [`adapter/AUTHORITY-MAP.md`](adapter/AUTHORITY-MAP.md).
 The attack regression covers policy, agent and wallet substitution, proof
 replay, front-running, nested CPI, cross-wallet reuse, and unapproved or
 changed downstream programs.
