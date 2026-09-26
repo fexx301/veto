@@ -22,11 +22,11 @@ use {
         authority::{programexec::ProgramExecAuthority, AuthorityType},
         swig::{swig_account_seeds, swig_wallet_address_seeds},
     },
-    veto_swig_gate::{validate_next_swig_instruction, validate_swig_account_binding},
+    veto_swig_gate::{
+        validate_next_swig_instruction, validate_swig_account_binding, POLICY_LEN, POLICY_SLOT_START,
+    },
 };
 
-const POLICY_LEN: usize = 522;
-const POLICY_SLOT_START: usize = 161;
 
 fn required_pubkey(name: &str) -> Result<Pubkey> {
     env::var(name)

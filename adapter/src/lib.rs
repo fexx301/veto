@@ -24,7 +24,9 @@ entrypoint!(process_instruction);
 
 /// Header (201 bytes), route count (1 byte), then up to `MAX_ROUTE` route
 /// entries of (program, approved deployment slot).
-const POLICY_LEN: usize = 202 + MAX_ROUTE * ROUTE_ENTRY_LEN;
+pub const POLICY_LEN: usize = 202 + MAX_ROUTE * ROUTE_ENTRY_LEN;
+/// Offset of the approved deployment slot (little-endian u64) in the policy.
+pub const POLICY_SLOT_START: usize = 161;
 const MAX_ROUTE: usize = 8;
 const ROUTE_ENTRY_LEN: usize = 40;
 const ROUTE_COUNT: usize = 201;
@@ -96,7 +98,7 @@ impl<'a> Policy<'a> {
     }
 
     fn slot(&self) -> u64 {
-        u64::from_le_bytes(self.bytes[161..169].try_into().unwrap())
+        u64::from_le_bytes(self.bytes[POLICY_SLOT_START..POLICY_SLOT_START + 8].try_into().unwrap())
     }
 
     fn agent(&self) -> [u8; 32] {

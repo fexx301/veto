@@ -30,8 +30,8 @@ use {
     veto_swig_gate::{validate_next_swig_instruction, validate_swig_account_binding},
 };
 
-pub const POLICY_LEN: usize = 522;
-pub const POLICY_SLOT_START: usize = 161;
+pub use veto_swig_gate::{POLICY_LEN, POLICY_SLOT_START};
+
 pub const TOKEN_PROGRAM_ID: Pubkey =
     solana_sdk::pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const MINT_LEN: u64 = 82;

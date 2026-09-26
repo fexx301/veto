@@ -187,7 +187,7 @@ mod tests {
     fn accepts_the_setup_approval() {
         let (operator, payer, gate) = keys();
         let setup = [
-            system_instruction::create_account(&payer, &Pubkey::new_unique(), 1, 522, &gate),
+            system_instruction::create_account(&payer, &Pubkey::new_unique(), 1, veto_swig_gate::POLICY_LEN as u64, &gate),
             gate_approval(gate, operator, 0),
             swig_add_authority(operator, 7, gate),
             gate_approval(gate, operator, 3),
