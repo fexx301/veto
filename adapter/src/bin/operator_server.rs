@@ -44,8 +44,10 @@ const INDEX_HTML: &str = include_str!("../../operator/index.html");
 const TOKENS_CSS: &str = include_str!("../../operator/tokens.css");
 const WALLET_CLIENT_JS: &str = include_str!("../../operator/wallet-client.bundle.js");
 const FAVICON_SVG: &str = include_str!("../../operator/brand/favicon.svg");
-/// A hosted run nobody has touched for this long can be taken over.
-const RUN_IDLE_TIMEOUT: Duration = Duration::from_secs(10 * 60);
+/// A hosted run nobody has touched for this long can be taken over. Every
+/// step completes in well under a minute, so an abandoned run should not
+/// keep the next visitor waiting long.
+const RUN_IDLE_TIMEOUT: Duration = Duration::from_secs(3 * 60);
 /// Refuse new hosted runs when the fee payer falls below this balance.
 const MIN_SETUP_LAMPORTS: u64 = 300_000_000;
 const COOKIE: &str = "veto_run";
