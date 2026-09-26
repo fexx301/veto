@@ -66,5 +66,7 @@ jobs:
             cargo-build-sbf --manifest-path "$manifest" --tools-version v1.54 --arch v3 -- --locked
           done
           cargo-build-sbf --manifest-path adapter/fixtures/merchant-pay/Cargo.toml --tools-version v1.54 --arch v3 --features drain -- --locked
-      - name: Report the gate hash (devnet gate is acc3073f…93ad)
+      # Informational: Linux builds differ from the macOS build deployed on devnet
+      # (acc3073f…93ad) because platform tools embed their own build paths.
+      - name: Report the gate hash
         run: sha256sum adapter/target/deploy/veto_swig_gate.so

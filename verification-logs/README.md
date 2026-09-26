@@ -253,9 +253,17 @@ devnet, all modes passed (exit 0): attack regression (including the new relay
 fixture: nested CPI rejected by Swig `Custom(8)`), `--payment`, `--route`
 (runtime rule, finalized-program and downstream-upgrade cases),
 `--external-operator-smoke`, `--external-operator-browser`, and
-`--operator-smoke`. Logs: `2026-09-25-standalone-*`. The standalone gate build
-is byte-identical to the gate deployed on devnet at
+`--operator-smoke`. Logs: `2026-09-25-standalone-*`. On the development
+machine (macOS arm64, cargo-build-sbf 4.1.0, platform tools v1.54) the
+standalone gate build is byte-identical to the gate deployed on devnet at
 `4okceHnZABKcqadXLK57mkU87c4GAUKNsunr5LHHShJq` (SHA-256 `acc3073f…93ad`).
+
+Correction (2026-09-26): this is not a cross-platform reproducible build. The
+Linux build in CI (Solana tools 4.2.1) produced `0ad6d6c4…8d84`, because each
+platform-tools release embeds its own build paths (for example
+`/Users/runner/work/platform-tools/...` in the macOS binary) and the toolchain
+versions differ. Independent verification of the deployed gate would need a
+pinned container build such as `solana-verify`; that is not set up yet.
 
 ## External review fixes — 2026-09-26
 
