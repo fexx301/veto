@@ -34,6 +34,7 @@
     .phase-label { display: none; min-height: 2.25rem; align-items: center; padding-inline: var(--space-xs); border: var(--rule-strong); border-radius: var(--radius-xs); color: var(--color-ink); font: 600 var(--text-xs)/1 var(--font-mono); text-transform: uppercase; white-space: nowrap; }
     .orientation { display: grid; gap: var(--space-md); padding-block: var(--space-lg) var(--space-xl); }
     .orientation-copy { min-width: 0; }
+    .hero-cta { display: inline-flex; min-height: 2.75rem; align-items: center; margin-block-start: var(--space-md); padding-inline: var(--space-md); border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font-size: var(--text-sm); font-weight: 650; text-decoration: none; }
     .kicker, .mono-label { color: var(--color-muted); font: 500 var(--text-xs)/1.35 var(--font-mono); letter-spacing: .055em; text-transform: uppercase; }
     h1 { max-width: 15ch; margin-block: var(--space-sm) var(--space-md); color: var(--color-ink); font: 600 clamp(2.5rem,4vw + .5rem,4.25rem)/.99 var(--font-display); letter-spacing: -.055em; overflow-wrap: anywhere; min-width: 0; }
     .lede { max-width: 52ch; margin-bottom: 0; color: var(--color-ink-2); font-size: var(--text-md); letter-spacing: -.015em; }
@@ -153,6 +154,7 @@
       .trust-node::after { top: 50%; right: -.65rem; bottom: auto; left: auto; transform: translateY(-50%); content: "→"; }
       .trust-readout { grid-template-columns: minmax(0,1fr) minmax(15rem,.7fr) auto; align-items: center; }
       .current-action { width: auto; }
+      .hero-cta { display: none; }
       .boundary-note { grid-template-columns: minmax(0,1.15fr) minmax(18rem,.85fr); }
       .event-row { grid-template-columns: 1.5rem minmax(0,1.35fr) minmax(8rem,.8fr) auto; align-items: center; }
       .event-slots { display: block; }
@@ -204,7 +206,7 @@
       <p id="workflow-announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></p>
       <p id="copy-announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></p>
       <section class="orientation" aria-labelledby="page-title">
-        <div class="orientation-copy"><p class="kicker">Agent wallets · Solana program upgrades</p><h1 id="page-title">An upgrade should stop the agent.</h1><p class="lede">Your agent's wallet trusts a program by its address. An upgrade keeps the address and swaps the code. Veto pauses the agent's payments until you approve the new deployment.</p></div>
+        <div class="orientation-copy"><p class="kicker">Agent wallets · Solana program upgrades</p><h1 id="page-title">An upgrade should stop the agent.</h1><p class="lede">Your agent's wallet trusts a program by its address. An upgrade keeps the address and swaps the code. Veto pauses the agent's payments until you approve the new deployment.</p><a class="hero-cta" href="#demo">Try the live demo ↓</a></div>
         <aside class="orientation-note" aria-label="Demo setup"><strong>Same agent, same budget, two wallets.</strong><p>Both Swig wallets let the agent pay a merchant program up to <span id="budget-copy">500</span> test tokens. One uses an ordinary program allowlist; the other routes through Veto.</p></aside>
       </section>
       <section id="workflow" class="trust-section" aria-labelledby="trust-title">
@@ -215,7 +217,7 @@
           <article id="node-wallet" class="trust-node"><span class="node-index">03 / delegation</span><div><strong class="node-name">Swig wallet</strong><span class="node-role">Agent role, 500-token limit</span></div><button id="swig-config" class="node-value" type="button" data-copy-value="" aria-label="Copy full Swig config address" disabled>initializing…</button></article>
           <article id="node-target" class="trust-node"><span class="node-index">04 / program</span><div><strong class="node-name">merchant-pay</strong><span class="node-role">Upgradeable by the protocol team</span></div><button id="target-id" class="node-value" type="button" data-copy-value="" aria-label="Copy full merchant-pay program address" disabled>initializing…</button></article>
         </div>
-        <div class="trust-readout"><div class="readout-main"><strong id="deployment-state">Reading state</strong><span id="state-chip" class="status-chip">Loading</span></div><div class="readout-slots"><div class="slot-readout"><span>Approved slot</span><strong id="approved-slot">—</strong></div><div class="slot-readout"><span>Deployed slot</span><strong id="current-slot">—</strong></div></div><div class="readout-actions"><button id="current-action" class="action-button current-action" type="button" disabled>Preparing…</button><button id="start-demo" class="secondary-action" type="button" hidden>Or connect your own devnet wallet</button><p id="wallet-hint" class="wallet-hint" hidden>The demo operator signs for you. Nothing here has real value.</p></div></div>
+        <div id="demo" class="trust-readout"><div class="readout-main"><strong id="deployment-state">Reading state</strong><span id="state-chip" class="status-chip">Loading</span></div><div class="readout-slots"><div class="slot-readout"><span>Approved slot</span><strong id="approved-slot">—</strong></div><div class="slot-readout"><span>Deployed slot</span><strong id="current-slot">—</strong></div></div><div class="readout-actions"><button id="current-action" class="action-button current-action" type="button" disabled>Preparing…</button><button id="start-demo" class="secondary-action" type="button" hidden>Or connect your own devnet wallet</button><p id="wallet-hint" class="wallet-hint" hidden>The demo operator signs for you. Nothing here has real value.</p></div></div>
         <div class="wallet-compare" aria-label="Wallet balances and deployed code">
           <div id="cell-veto" class="wallet-cell"><span>Veto wallet</span><strong id="balance-veto">—</strong><small>Agent pays through Veto</small></div>
           <div id="cell-plain" class="wallet-cell"><span>Plain allowlist</span><strong id="balance-plain">—</strong><small>Agent key allowed directly</small></div>
