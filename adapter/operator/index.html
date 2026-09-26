@@ -77,6 +77,8 @@
     .explorer-link:hover { text-decoration: underline; }
     .wallet-hint { margin: var(--space-2xs) 0 0; color: var(--color-on-dark-muted); font-size: var(--text-xs); }
     .wallet-hint[hidden] { display: none; }
+    .scenario-hint { margin: var(--space-sm) 0 0; color: var(--color-muted); font-size: var(--text-sm); }
+    .scenario-hint[hidden] { display: none; }
     .console-grid { display: grid; gap: var(--space-xl); padding-block: var(--space-lg) var(--space-2xl); }
     .action-console, .evidence-console { min-width: 0; }
     .console-title { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); margin-block-end: var(--space-md); }
@@ -220,6 +222,7 @@
           <div id="cell-merchant" class="wallet-cell"><span>Merchant received</span><strong id="balance-merchant">—</strong><small>Test tokens, no value</small></div>
           <div id="cell-code" class="wallet-cell"><span>Deployed code</span><strong id="code-state" class="code-value">—</strong><small id="code-hash">sha256 —</small></div>
         </div>
+      <p id="scenario-hint" class="scenario-hint" hidden>What a run shows: both wallets pay 10 test tokens, then the program's upgrade key swaps its code for a version that charges the whole balance. Watch which wallet loses its 500.</p>
       </section>
       <section class="console-grid" aria-label="Operator controls and evidence">
         <div class="action-console"><div class="console-title"><h2>Run the scenario</h2><span id="sequence-progress" class="mono-label">Preparing</span></div><ol class="step-list">
@@ -348,7 +351,10 @@
       ["plain-ledger"].forEach((id) => showAddress(id, data.plainSwigConfig));
       ["agent-ledger"].forEach((id) => showAddress(id, data.agent));
       ["mint-ledger"].forEach((id) => showAddress(id, data.mint));
-      const balances = data.balances || {};
+      // Before a run, show the starting budgets rather than empty dashes.
+      const idle = data.phase === "idle";
+      const balances = idle ? { veto: data.budget, plain: data.budget, merchant: "0.00" } : (data.balances || {});
+      document.getElementById("scenario-hint").hidden = !idle;
       document.getElementById("balance-veto").textContent = balances.veto ?? "—";
       document.getElementById("balance-plain").textContent = balances.plain ?? "—";
       document.getElementById("balance-merchant").textContent = balances.merchant ?? "—";
