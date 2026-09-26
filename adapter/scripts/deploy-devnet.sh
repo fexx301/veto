@@ -22,7 +22,9 @@ GATE_SO="$ROOT/adapter/target/deploy/veto_swig_gate.so"
 cd "$ROOT"
 
 mkdir -p "$DIR" && chmod 700 "$DIR"
-for key in deployer gate pay protocol agent; do
+# gate-authority upgrades the Veto gate. Unlike deployer, it is never copied
+# to the hosted server (push.sh), so the server cannot replace the gate.
+for key in deployer gate gate-authority pay protocol agent; do
   [[ -f "$DIR/$key.json" ]] || "$KEYGEN" new --no-bip39-passphrase --silent --outfile "$DIR/$key.json"
   chmod 600 "$DIR/$key.json"
 done
@@ -31,10 +33,11 @@ GATE_ID="$("$KEYGEN" pubkey "$DIR/gate.json")"
 PAY_ID="$("$KEYGEN" pubkey "$DIR/pay.json")"
 PROTOCOL="$("$KEYGEN" pubkey "$DIR/protocol.json")"
 AGENT="$("$KEYGEN" pubkey "$DIR/agent.json")"
+GATE_AUTHORITY="$("$KEYGEN" pubkey "$DIR/gate-authority.json")"
 sol() { "$SOLANA" --url "$URL" --keypair "$DIR/deployer.json" "$@"; }
 
 if [[ "${1:-}" == "--finalize" ]]; then
-  sol program set-upgrade-authority "$GATE_ID" --final
+  sol program set-upgrade-authority "$GATE_ID" --upgrade-authority "$DIR/gate-authority.json" --final
   sol program show "$GATE_ID"
   exit 0
 fi
@@ -61,7 +64,14 @@ fi
 cargo build --locked --manifest-path adapter/Cargo.toml --features client --bin operator_server
 shasum -a 256 "$GATE_SO" "$PAY_DEPLOY/merchant_pay_v1.so" "$PAY_DEPLOY/merchant_pay_v2.so"
 
-sol program deploy --program-id "$DIR/gate.json" "$GATE_SO"
+# Earlier deployments left the gate's upgrade authority with deployer, a key
+# the hosted server holds; hand it to gate-authority first.
+if [[ "$(sol program show "$GATE_ID" 2>/dev/null | awk '/^Authority:/ {print $2}')" == "$DEPLOYER" ]]; then
+  sol program set-upgrade-authority "$GATE_ID" --new-upgrade-authority "$DIR/gate-authority.json"
+fi
+sol program deploy --program-id "$DIR/gate.json" --upgrade-authority "$DIR/gate-authority.json" "$GATE_SO"
+[[ "$(sol program show "$GATE_ID" | awk '/^Authority:/ {print $2}')" == "$GATE_AUTHORITY" ]] \
+  || { echo "gate upgrade authority is not gate-authority" >&2; exit 1; }
 lamports() { sol balance --lamports "$1" | awk '{print $1}'; }
 (( $(lamports "$PROTOCOL") >= 500000000 )) || sol transfer --allow-unfunded-recipient "$PROTOCOL" 1 >/dev/null
 (( $(lamports "$AGENT") >= 100000000 )) || sol transfer --allow-unfunded-recipient "$AGENT" 0.2 >/dev/null
