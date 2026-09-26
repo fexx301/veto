@@ -366,11 +366,19 @@
       document.getElementById("footer-network").textContent = onDevnet ? "Solana devnet demo" : "local validator demo";
       document.getElementById("network-label").textContent = onDevnet ? "Live devnet state" : "Live local state";
       document.getElementById("sequence-progress").textContent = data.phase === "resumed" ? "Complete" : "Live run";
+      // Colour only what has happened: before a run everything is neutral,
+      // "active" marks whose turn it is, green means approved or completed.
+      const approved = data.approvedSlot !== null && data.approvedSlot !== undefined;
       const needsHuman = data.phase === "awaitingApproval" || data.phase === "fixed";
-      document.getElementById("node-human").dataset.status = needsHuman ? "active" : "verified";
-      document.getElementById("node-target").dataset.status = !matches ? "blocked" : (data.phase === "resumed" ? "verified" : "");
-      document.getElementById("node-policy").dataset.status = stale ? "blocked" : (data.phase === "reapproved" || data.phase === "resumed" ? "verified" : "active");
-      document.getElementById("node-wallet").dataset.status = data.phase === "ready" || data.phase === "reapproved" ? "active" : (data.phase === "executed" || data.phase === "resumed" ? "verified" : "");
+      const setStatus = (id, status) => {
+        const node = document.getElementById(id);
+        if (status) node.dataset.status = status;
+        else node.removeAttribute("data-status");
+      };
+      setStatus("node-human", needsHuman ? "active" : (approved ? "verified" : ""));
+      setStatus("node-target", !matches ? "blocked" : (data.phase === "resumed" ? "verified" : ""));
+      setStatus("node-policy", !approved ? "" : (stale ? "blocked" : (data.phase === "reapproved" || data.phase === "resumed" ? "verified" : "")));
+      setStatus("node-wallet", !approved ? "" : (data.phase === "executed" || data.phase === "resumed" ? "verified" : ""));
       const enabled = nextAction(data.phase, data);
       const startDemo = document.getElementById("start-demo");
       startDemo.hidden = enabled !== "start";
