@@ -11,6 +11,12 @@ SRC="$HOME/veto"
 KEYS="$HOME/veto-keys"
 AGAVE_VERSION="${AGAVE_VERSION:-v4.2.1}"
 
+# Values below are written into /etc/veto.env and the Caddyfile; refuse
+# anything that could add a line or directive.
+host_name() { [[ -z "$1" || "$1" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "invalid host name: $1" >&2; exit 1; }; }
+host_name "$DOMAIN"
+host_name "${REDIRECT_FROM:-}"
+
 # 4 GiB swap so the Rust build fits a 2 GiB instance.
 if ! swapon --show | grep -q /swapfile; then
   sudo fallocate -l 4G /swapfile
@@ -63,11 +69,17 @@ sudo cp -r "$(dirname "$(readlink -f "$SOLANA_BIN")")"/. /opt/veto/solana/
 
 # shellcheck disable=SC1091
 source "$KEYS/env"
+for id in "$GATE_ID" "$PAY_ID"; do
+  [[ "$id" =~ ^[1-9A-HJ-NP-Za-km-z]{32,44}$ ]] || { echo "invalid program id: $id" >&2; exit 1; }
+done
+RPC_URL="${RPC_URL:-https://api.devnet.solana.com}"
+[[ "$RPC_URL" =~ ^https://[^[:space:]]+$ ]] || { echo "RPC_URL must be a single https:// URL" >&2; exit 1; }
+[[ "${MAX_RUNS_PER_HOUR:-20}" =~ ^[0-9]+$ ]] || { echo "invalid MAX_RUNS_PER_HOUR" >&2; exit 1; }
 sudo tee /etc/veto.env >/dev/null <<ENV
 HOSTED=1
 PUBLIC_ORIGIN=https://$DOMAIN
 BIND_ADDR=127.0.0.1:4173
-RPC_URL=${RPC_URL:-https://api.devnet.solana.com}
+RPC_URL=$RPC_URL
 MAX_RUNS_PER_HOUR=${MAX_RUNS_PER_HOUR:-20}
 HUMAN_PATH=/var/lib/veto/keys/deployer.json
 AGENT_PATH=/var/lib/veto/keys/agent.json
