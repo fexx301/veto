@@ -61,3 +61,8 @@ path = "src/bin/operator_server.rs"
 required-features = ["client"]
 
 [workspace]
+
+# Arithmetic panics on overflow in release builds too: the SBF gate and the
+# hosted operator server.
+[profile.release]
+overflow-checks = true
