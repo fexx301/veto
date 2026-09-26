@@ -91,7 +91,10 @@
     .step-copy { margin-block-end: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
     .action-button { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; padding-inline: var(--space-sm); border: 1px solid var(--color-ink); border-radius: var(--radius-pill); background: var(--color-ink); color: var(--color-paper); font-size: var(--text-sm); font-weight: 650; white-space: nowrap; transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out); }
     .action-button:active { transform: translateY(1px); }
-    .action-button:disabled { border-color: var(--color-rule); background: var(--color-paper-2); color: var(--color-muted); opacity: .58; }
+    .action-button:disabled { border-color: var(--color-rule); background: transparent; color: var(--color-muted); opacity: .45; }
+    /* The next thing to press is coral; everything else recedes. */
+    .current-action:not(:disabled), .step[data-state="active"] .action-button:not(:disabled) { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
+    .trust-readout .current-action:disabled { border-color: var(--color-ink-2); color: var(--color-on-dark-muted); opacity: 1; }
     .action-button[data-busy="true"]::before { width: .8rem; height: .8rem; margin-inline-end: var(--space-2xs); border: 2px solid var(--color-rule-strong); border-top-color: var(--color-paper); border-radius: 50%; content: ""; animation: spin var(--dur-standard) linear infinite; }
     .step[data-state="active"] .step-marker { border-color: var(--color-ink); background: var(--color-ink); color: var(--color-paper); }
     .step[data-step="reapprove"][data-state="active"] .step-marker { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
