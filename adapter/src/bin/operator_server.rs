@@ -659,7 +659,9 @@ impl DemoState {
                 let plain_signature = plain_pay(run)?;
                 let signature = send(rpc, agent, &[], guarded_pay(run)?)?;
                 let (veto, plain) = balances(run)?;
-                if veto_before - veto != PAYMENT || plain_before - plain != PAYMENT {
+                if veto_before.checked_sub(veto) != Some(PAYMENT)
+                    || plain_before.checked_sub(plain) != Some(PAYMENT)
+                {
                     bail!("reviewed payments did not charge exactly the requested amount")
                 }
                 run.phase = Phase::Executed;
@@ -698,7 +700,7 @@ impl DemoState {
                     "tone": "warning",
                     "detail": format!(
                         "The agent asked for {} from each wallet. Plain allowlist was charged {}. Veto rejected the call ({}), balance unchanged at {}. Signature: {}. Plain allowlist signature: {}.",
-                        units(PAYMENT), units(plain_before - plain), error, units(veto), signature, plain_signature
+                        units(PAYMENT), units(plain_before.saturating_sub(plain)), error, units(veto), signature, plain_signature
                     )
                 });
             },
@@ -737,7 +739,7 @@ impl DemoState {
                 let (veto_before, _) = balances(run)?;
                 let signature = send(rpc, agent, &[], guarded_pay(run)?)?;
                 let (veto, _) = balances(run)?;
-                if veto_before - veto != PAYMENT {
+                if veto_before.checked_sub(veto) != Some(PAYMENT) {
                     bail!("resumed payment did not charge exactly the requested amount")
                 }
                 run.phase = Phase::Resumed;

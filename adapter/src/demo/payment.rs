@@ -121,7 +121,9 @@ pub fn programdata_and_slot(rpc: &RpcClient, program: &Pubkey) -> Result<(Pubkey
         .get_account(&programdata)
         .with_context(|| format!("missing ProgramData {programdata}"))?;
     let metadata_len = UpgradeableLoaderState::size_of_programdata_metadata();
-    let metadata: UpgradeableLoaderState = bincode::deserialize(&account.data[..metadata_len])?;
+    let metadata: UpgradeableLoaderState = bincode::deserialize(
+        account.data.get(..metadata_len).ok_or_else(|| anyhow!("ProgramData is too short"))?,
+    )?;
     match metadata {
         UpgradeableLoaderState::ProgramData { slot, .. } => Ok((programdata, slot)),
         _ => bail!("canonical ProgramData has an unexpected loader state"),
@@ -154,7 +156,9 @@ fn hex(bytes: &[u8]) -> String {
 pub fn deployed_code_hash(rpc: &RpcClient, program: &Pubkey) -> Result<String> {
     let data = rpc.get_account_data(&get_program_data_address(program))?;
     let metadata_len = UpgradeableLoaderState::size_of_programdata_metadata();
-    Ok(hex(&hash(trim_trailing_zeros(&data[metadata_len..])).to_bytes()))
+    Ok(hex(&hash(trim_trailing_zeros(
+        data.get(metadata_len..).ok_or_else(|| anyhow!("ProgramData is too short"))?,
+    )).to_bytes()))
 }
 
 /// Deployment slot and code hash read from one ProgramData snapshot, so an
@@ -163,11 +167,15 @@ pub fn deployed_code_hash(rpc: &RpcClient, program: &Pubkey) -> Result<String> {
 pub fn deployment_snapshot(rpc: &RpcClient, program: &Pubkey) -> Result<(u64, String)> {
     let data = rpc.get_account_data(&get_program_data_address(program))?;
     let metadata_len = UpgradeableLoaderState::size_of_programdata_metadata();
-    let slot = match bincode::deserialize(&data[..metadata_len])? {
+    let slot = match bincode::deserialize(
+        data.get(..metadata_len).ok_or_else(|| anyhow!("ProgramData is too short"))?,
+    )? {
         UpgradeableLoaderState::ProgramData { slot, .. } => slot,
         _ => bail!("canonical ProgramData has an unexpected loader state"),
     };
-    Ok((slot, hex(&hash(trim_trailing_zeros(&data[metadata_len..])).to_bytes())))
+    Ok((slot, hex(&hash(trim_trailing_zeros(
+        data.get(metadata_len..).ok_or_else(|| anyhow!("ProgramData is too short"))?,
+    )).to_bytes())))
 }
 
 /// The same hash computed over a local build, for comparison.
@@ -235,7 +243,9 @@ pub fn mint_to_ix(mint: &Pubkey, destination: &Pubkey, authority: &Pubkey, amoun
 
 pub fn balance(rpc: &RpcClient, token_account: &Pubkey) -> Result<u64> {
     let data = rpc.get_account_data(token_account)?;
-    Ok(u64::from_le_bytes(data[64..72].try_into()?))
+    Ok(u64::from_le_bytes(
+        data.get(64..72).ok_or_else(|| anyhow!("not a token account"))?.try_into()?,
+    ))
 }
 
 pub fn units(amount: u64) -> String {
@@ -467,7 +477,11 @@ impl Guarded {
             return Ok(None);
         }
         Ok(Some(u64::from_le_bytes(
-            account.data[POLICY_SLOT_START..POLICY_SLOT_START + 8].try_into()?,
+            account
+                .data
+                .get(POLICY_SLOT_START..POLICY_SLOT_START + 8)
+                .ok_or_else(|| anyhow!("policy account is too short"))?
+                .try_into()?,
         )))
     }
 }
