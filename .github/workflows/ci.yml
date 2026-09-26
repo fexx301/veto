@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Formatting is deliberately not enforced: reformatting the on-chain sources
+# moves source lines, which changes panic-location strings in the compiled
+# programs and would break the byte-identical match with the deployed gate and
+# the reviewed merchant-pay build.
+
+jobs:
+  rust:
+    name: Host tests and client build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install system libraries
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libudev-dev pkg-config libssl-dev
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: adapter
+      - name: Host tests (gate payload parsing, signer checks)
+        run: cargo test --locked --manifest-path adapter/Cargo.toml --features client
+      - name: Build client binaries
+        run: cargo build --locked --manifest-path adapter/Cargo.toml --features client --bins
+
+  console:
+    name: Console bundle is current
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: adapter/operator/package-lock.json
+      - name: Install and build the wallet bridge
+        working-directory: adapter/operator
+        run: npm ci --ignore-scripts && npm run build
+      - name: Fail if the committed bundle is stale
+        run: git diff --exit-code -- adapter/operator/wallet-client.bundle.js
+
+  onchain:
+    name: On-chain programs build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install system libraries
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libudev-dev pkg-config libssl-dev
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install
+      - name: Install Solana tools 4.2.1
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v4.2.1/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: Build the gate and fixtures
+        run: |
+          for manifest in adapter/Cargo.toml adapter/fixtures/*/Cargo.toml; do
+            cargo-build-sbf --manifest-path "$manifest" --tools-version v1.54 --arch v3 -- --locked
+          done
+          cargo-build-sbf --manifest-path adapter/fixtures/merchant-pay/Cargo.toml --tools-version v1.54 --arch v3 --features drain -- --locked
+      - name: Report the gate hash (devnet gate is acc3073f…93ad)
+        run: sha256sum adapter/target/deploy/veto_swig_gate.so
