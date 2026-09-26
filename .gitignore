@@ -7,3 +7,9 @@ adapter/runtime-ledger-*
 adapter/verification-output/
 test-ledger/
 verification-logs/runs/
+# Keys and secrets never belong in the repository.
+*.pem
+*.key
+.env
+*keypair*.json
+keys/

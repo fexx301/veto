@@ -6,6 +6,8 @@
 #   ./adapter/scripts/deploy-devnet.sh              # build and deploy
 #   ./adapter/scripts/deploy-devnet.sh --finalize   # make Veto immutable
 set -euo pipefail
+# Keys and the env file are created private from the start.
+umask 077
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SOLANA_TOOLS="${SOLANA_TOOLS:-$HOME/.local/share/solana/install/active_release/bin}"

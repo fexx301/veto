@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Disposable keys are still created private from the start.
+umask 077
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SOLANA_TOOLS="${SOLANA_TOOLS:-$HOME/.local/share/solana/install/active_release/bin}"
