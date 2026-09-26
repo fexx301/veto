@@ -45,6 +45,12 @@ async function pressCurrentAction(page) {
 }
 
 (async () => {
+  // This check signs approvals with OPERATOR_KEYPAIR; refuse any console that
+  // is not on a local validator or devnet.
+  if (externalOperator) {
+    const { network } = await (await fetch(`${consoleUrl}/api/status`)).json();
+    assert.ok(["localnet", "devnet"].includes(network), `refusing to sign for a ${network} console`);
+  }
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const disconnected = await browser.newPage({ viewport: { width: 320, height: 700 } });
   let offlinePosts = 0;
