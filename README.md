@@ -18,12 +18,13 @@ devnet test wallet, or use the demo operator.
 ## Why it matters
 
 Measured on mainnet on 2026-09-24 across the 117 programs Jupiter routes swaps
-through plus major first-hop programs ([method and data](verification-logs/2026-09-24-upgrade-study/)):
+through plus major first-hop programs ([method, data and caveats](verification-logs/2026-09-24-upgrade-study/);
+counts are lower bounds):
 
 | | |
 |---|---|
 | Programs that can still be upgraded | **115 of 117** |
-| Upgraded in the last 180 days | **67** (712 upgrades) |
+| Upgraded in the last 180 days | **at least 67** (712 upgrades counted) |
 | Upgraded weekly or faster | **27** |
 | Upgrade authority is a single key | **35** (19 of them actively upgraded) |
 | Jupiter Aggregator v6 upgrades in 180 days | **23** |
