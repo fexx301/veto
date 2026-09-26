@@ -55,6 +55,9 @@ fi
 cd "$SRC"
 cargo build --release --locked --manifest-path adapter/Cargo.toml --features client --bin operator_server
 
+# The console treats merchant_pay_v1.so as the reviewed build, so it must
+# be the committed one.
+(cd adapter/fixtures/merchant-pay/target/deploy && sha256sum -c "$SRC/adapter/fixtures/merchant-pay/builds.sha256")
 sudo install -d -m 755 /opt/veto /opt/veto/programs
 sudo install -m 755 adapter/target/release/operator_server /opt/veto/operator_server
 sudo install -m 644 adapter/fixtures/merchant-pay/target/deploy/merchant_pay_v1.so /opt/veto/programs/

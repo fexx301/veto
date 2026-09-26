@@ -70,6 +70,12 @@ call the upgradeable `merchant-pay` fixture. The fixture's `drain` feature
 builds the malicious v2 that charges the whole balance. Success ends with
 `payment-flow-passed`.
 
+The console treats `merchant_pay_v1.so` as the reviewed build. The SHA-256 of
+the v1 and v2 builds shipped to the hosted demo is committed in
+`adapter/fixtures/merchant-pay/builds.sha256`; `push.sh` and `provision.sh`
+refuse other files. These are macOS builds (see the reproducibility note in
+`verification-logs/README.md`); update the file when the fixture changes.
+
 ## Operator walkthrough
 
 Install and build the pinned browser-wallet client once:

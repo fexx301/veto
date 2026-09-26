@@ -15,6 +15,8 @@ for name in "$DOMAIN" "${REDIRECT_FROM:-}"; do
   [[ -z "$name" || "$name" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "invalid host name: $name" >&2; exit 1; }
 done
 cd "$ROOT"
+# Ship only the merchant-pay builds whose hashes are committed.
+(cd "$PAY" && shasum -a 256 -c "$ROOT/adapter/fixtures/merchant-pay/builds.sha256")
 "${SSH[@]}" "$HOST" 'mkdir -p ~/veto ~/veto-keys && chmod 700 ~/veto-keys'
 git archive --format=tar HEAD | "${SSH[@]}" "$HOST" 'tar -x -C ~/veto'
 tar -c "$PAY/merchant_pay_v1.so" "$PAY/merchant_pay_v2.so" | "${SSH[@]}" "$HOST" 'tar -x -C ~/veto'

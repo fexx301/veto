@@ -98,6 +98,11 @@ PAY_DEPLOY="adapter/fixtures/merchant-pay/target/deploy"
 cp "$PAY_DEPLOY/veto_merchant_pay.so" "$PAY_DEPLOY/merchant_pay_v1.so"
 "$BUILD_SBF" --manifest-path adapter/fixtures/merchant-pay/Cargo.toml --tools-version v1.54 --arch v3 --features drain -- --locked
 cp "$PAY_DEPLOY/veto_merchant_pay.so" "$PAY_DEPLOY/merchant_pay_v2.so"
+# The two builds come from one output path; make sure v2 really replaced v1.
+if cmp -s "$PAY_DEPLOY/merchant_pay_v1.so" "$PAY_DEPLOY/merchant_pay_v2.so"; then
+  echo "merchant-pay v1 and v2 builds are identical" >&2
+  exit 1
+fi
 "$BUILD_SBF" --manifest-path adapter/fixtures/payment-router/Cargo.toml --tools-version v1.54 --arch v3 -- --locked
 ROUTER_SO="adapter/fixtures/payment-router/target/deploy/veto_payment_router.so"
 "$BUILD_SBF" --manifest-path adapter/fixtures/sneaky-cpi/Cargo.toml --tools-version v1.54 --arch v3 -- --locked

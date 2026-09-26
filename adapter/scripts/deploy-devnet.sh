@@ -53,6 +53,11 @@ fi
 cp "$PAY_DEPLOY/veto_merchant_pay.so" "$PAY_DEPLOY/merchant_pay_v1.so"
 "$BUILD_SBF" --manifest-path adapter/fixtures/merchant-pay/Cargo.toml --tools-version v1.54 --arch v3 --features drain -- --locked
 cp "$PAY_DEPLOY/veto_merchant_pay.so" "$PAY_DEPLOY/merchant_pay_v2.so"
+# The two builds come from one output path; make sure v2 really replaced v1.
+if cmp -s "$PAY_DEPLOY/merchant_pay_v1.so" "$PAY_DEPLOY/merchant_pay_v2.so"; then
+  echo "merchant-pay v1 and v2 builds are identical" >&2
+  exit 1
+fi
 cargo build --locked --manifest-path adapter/Cargo.toml --features client --bin operator_server
 shasum -a 256 "$GATE_SO" "$PAY_DEPLOY/merchant_pay_v1.so" "$PAY_DEPLOY/merchant_pay_v2.so"
 
