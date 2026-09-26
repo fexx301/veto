@@ -28,7 +28,7 @@ use {
         collections::VecDeque,
         env,
         io::{Read, Write},
-        net::{TcpListener, TcpStream},
+        net::{IpAddr, TcpListener, TcpStream},
         sync::{
             atomic::{AtomicUsize, Ordering},
             Arc, Mutex, TryLockError,
@@ -56,6 +56,8 @@ const COOKIE: &str = "veto_run";
 const REQUEST_DEADLINE: Duration = Duration::from_secs(10);
 /// Connections handled at once; further connections get an immediate 503.
 const MAX_CONNECTIONS: usize = 64;
+/// Hosted runs one client address may start per hour, within the global limit.
+const MAX_RUNS_PER_CLIENT_PER_HOUR: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Phase {
@@ -132,7 +134,7 @@ struct Run {
 struct DemoState {
     shared: Shared,
     run: Option<Run>,
-    run_starts: VecDeque<Instant>,
+    run_starts: VecDeque<(Instant, IpAddr)>,
 }
 
 fn required_pubkey(name: &str) -> Result<Pubkey> {
@@ -426,16 +428,28 @@ impl DemoState {
 
     /// Starts a hosted run. `operator` is the visitor's wallet address, or
     /// `None` for the server's demo operator key.
-    fn start(&mut self, operator: Option<Pubkey>, caller: Option<&str>) -> Result<String> {
+    fn start(
+        &mut self,
+        operator: Option<Pubkey>,
+        caller: Option<&str>,
+        client: IpAddr,
+    ) -> Result<String> {
+        if operator == Some(self.shared.setup.pubkey()) {
+            bail!("choose the demo operator instead of entering the server's own address")
+        }
         if !self.run_is_free(caller) {
             bail!("another visitor is running the demo; try again in a few minutes")
         }
         let hour = Duration::from_secs(3600);
-        while self.run_starts.front().is_some_and(|start| start.elapsed() > hour) {
+        while self.run_starts.front().is_some_and(|(start, _)| start.elapsed() > hour) {
             self.run_starts.pop_front();
         }
         if self.run_starts.len() >= self.shared.max_runs_per_hour {
             bail!("the hourly demo limit has been reached; try again later")
+        }
+        let from_client = self.run_starts.iter().filter(|(_, ip)| *ip == client).count();
+        if from_client >= MAX_RUNS_PER_CLIENT_PER_HOUR {
+            bail!("you have started the demo several times this hour; try again later")
         }
         if self.shared.rpc.get_balance(&self.shared.setup.pubkey())? < MIN_SETUP_LAMPORTS {
             bail!("the demo's devnet fee payer is low on test SOL; try again later")
@@ -444,7 +458,7 @@ impl DemoState {
         let run = self.shared.start_run(operator)?;
         let token = run.token.clone();
         self.run = Some(run);
-        self.run_starts.push_back(Instant::now());
+        self.run_starts.push_back((Instant::now(), client));
         Ok(token)
     }
 
@@ -767,6 +781,7 @@ struct Request {
     host: String,
     origin: Option<String>,
     cookie: Option<String>,
+    forwarded_for: Option<String>,
     body: Vec<u8>,
 }
 
@@ -812,6 +827,7 @@ fn read_request(stream: &mut TcpStream) -> Result<Request> {
     let mut host = None;
     let mut origin = None;
     let mut cookie = None;
+    let mut forwarded_for = None;
     let mut content_length = 0usize;
     for line in lines {
         if let Some((name, value)) = line.split_once(':') {
@@ -824,6 +840,7 @@ fn read_request(stream: &mut TcpStream) -> Result<Request> {
                         (key == COOKIE).then(|| value.to_owned())
                     })
                 },
+                "x-forwarded-for" => forwarded_for = Some(value.trim().to_owned()),
                 "content-length" => {
                     content_length = value.trim().parse().context("invalid Content-Length")?;
                 },
@@ -851,6 +868,7 @@ fn read_request(stream: &mut TcpStream) -> Result<Request> {
         host: host.unwrap_or_default(),
         origin,
         cookie,
+        forwarded_for,
         body,
     })
 }
@@ -945,6 +963,24 @@ struct HttpConfig {
     secure_cookie: bool,
 }
 
+/// The visitor's address. Behind the hosted reverse proxy every connection
+/// comes from loopback, so the proxy's X-Forwarded-For is used; the proxy
+/// replaces any value the client sent. A non-loopback peer's header is ignored.
+fn client_ip(stream: &TcpStream, forwarded_for: Option<&str>) -> Result<IpAddr> {
+    let peer = stream.peer_addr()?.ip();
+    Ok(forwarded_client(peer, forwarded_for))
+}
+
+fn forwarded_client(peer: IpAddr, forwarded_for: Option<&str>) -> IpAddr {
+    if !peer.is_loopback() {
+        return peer;
+    }
+    forwarded_for
+        .and_then(|value| value.rsplit(',').next())
+        .and_then(|last| last.trim().parse().ok())
+        .unwrap_or(peer)
+}
+
 /// Serves one request. Status reads fall back to the last computed status
 /// while a slow transaction holds the state lock, so one visitor's devnet
 /// upgrade does not freeze everyone else's page.
@@ -980,6 +1016,7 @@ fn handle(
         );
     }
     let caller = request.cookie.as_deref();
+    let client = client_ip(&stream, request.forwarded_for.as_deref())?;
     // Actions refresh the cached status so other visitors see current state
     // while a later slow action holds the lock.
     let remember = |result: Result<Value>| -> Result<Value> {
@@ -1069,7 +1106,7 @@ fn handle(
                         .map(Some)
                         .context("operator is not a valid Solana address"),
                 });
-            let (result, cookie) = match operator.and_then(|operator| guard.start(operator, caller)) {
+            let (result, cookie) = match operator.and_then(|operator| guard.start(operator, caller, client)) {
                 Ok(token) => {
                     let secure = if config.secure_cookie { "; Secure" } else { "" };
                     let cookie = format!(
@@ -1196,7 +1233,18 @@ fn main() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::redact_urls;
+    use super::{forwarded_client, redact_urls};
+
+    #[test]
+    fn trusts_forwarded_for_only_from_loopback() {
+        let proxy = "127.0.0.1".parse().unwrap();
+        let remote = "203.0.113.7".parse().unwrap();
+        let visitor: std::net::IpAddr = "198.51.100.2".parse().unwrap();
+        assert_eq!(forwarded_client(proxy, Some("10.0.0.1, 198.51.100.2")), visitor);
+        assert_eq!(forwarded_client(proxy, None), proxy);
+        assert_eq!(forwarded_client(proxy, Some("not-an-ip")), proxy);
+        assert_eq!(forwarded_client(remote, Some("198.51.100.2")), remote);
+    }
 
     #[test]
     fn redacts_rpc_urls_with_keys() {
