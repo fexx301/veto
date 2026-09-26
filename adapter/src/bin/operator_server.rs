@@ -183,6 +183,18 @@ impl Shared {
             bail!("HOSTED=1 requires PUBLIC_ORIGIN, for example https://veto.example")
         }
         let bind_addr = env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:4173".into());
+        // Fail closed: without HOSTED=1 every caller may drive the run, so a
+        // non-hosted console must only ever listen on loopback.
+        let loopback = bind_addr
+            .parse::<std::net::SocketAddr>()
+            .map(|addr| addr.ip().is_loopback())
+            .unwrap_or(false);
+        if !hosted && !loopback {
+            bail!("BIND_ADDR {bind_addr} is not loopback; set HOSTED=1 to serve beyond this machine")
+        }
+        if hosted && !rpc_url.starts_with("https://") {
+            bail!("HOSTED=1 requires an https:// RPC_URL")
+        }
         let max_runs_per_hour = env::var("MAX_RUNS_PER_HOUR")
             .ok()
             .map(|value| value.parse().context("invalid MAX_RUNS_PER_HOUR"))
