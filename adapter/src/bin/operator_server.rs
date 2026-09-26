@@ -772,6 +772,7 @@ struct Request {
 
 fn read_request(stream: &mut TcpStream) -> Result<Request> {
     stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+    stream.set_write_timeout(Some(Duration::from_secs(5)))?;
     let started = Instant::now();
     let past_deadline = || started.elapsed() > REQUEST_DEADLINE;
     let mut bytes = Vec::with_capacity(2048);
@@ -1068,22 +1069,27 @@ fn handle(
                         .map(Some)
                         .context("operator is not a valid Solana address"),
                 });
-            match operator.and_then(|operator| guard.start(operator, caller)) {
+            let (result, cookie) = match operator.and_then(|operator| guard.start(operator, caller)) {
                 Ok(token) => {
                     let secure = if config.secure_cookie { "; Secure" } else { "" };
                     let cookie = format!(
                         "Set-Cookie: {COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict{secure}\r\n"
                     );
-                    json_response(&mut stream, remember(guard.status(Some(&token))), &cookie)
+                    (remember(guard.status(Some(&token))), cookie)
                 },
-                Err(error) => json_response(&mut stream, Err(error), ""),
-            }
+                Err(error) => (Err(error), String::new()),
+            };
+            // Release the state lock before writing to the (possibly slow) client.
+            drop(guard);
+            json_response(&mut stream, result, &cookie)
         },
         ("POST", "/api/operator/approval-transaction") => {
             let Some(mut guard) = lock() else {
                 return json_response(&mut stream, Err(busy()), "");
             };
-            json_response(&mut stream, guard.prepare_operator_approval(caller), "")
+            let result = guard.prepare_operator_approval(caller);
+            drop(guard);
+            json_response(&mut stream, result, "")
         },
         ("POST", "/api/operator/submit-approval") => {
             let Some(mut guard) = lock() else {
@@ -1099,6 +1105,7 @@ fn handle(
                         .ok_or_else(|| anyhow!("approval submission is missing transaction"))
                 })
                 .and_then(|transaction| guard.submit_operator_approval(&transaction, caller));
+            drop(guard);
             json_response(&mut stream, remember(result), "")
         },
         ("POST", path) if path.starts_with("/api/action/") => {
@@ -1106,7 +1113,9 @@ fn handle(
                 return json_response(&mut stream, Err(busy()), "");
             };
             let action = path.trim_start_matches("/api/action/");
-            json_response(&mut stream, remember(guard.act(action, caller)), "")
+            let result = guard.act(action, caller);
+            drop(guard);
+            json_response(&mut stream, remember(result), "")
         },
         ("GET", _) | ("POST", _) => write_response(
             &mut stream,
