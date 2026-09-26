@@ -571,6 +571,14 @@ impl DemoState {
         if transaction.message != pending.transaction.message {
             bail!("operator changed the reviewed approval transaction")
         }
+        // Transaction::verify() zips signatures with keys, so a truncated
+        // signature list would verify vacuously. Require every signature.
+        let required = transaction.message.header.num_required_signatures as usize;
+        if transaction.signatures.len() != required
+            || pending.transaction.signatures.len() != required
+        {
+            bail!("operator transaction does not carry the required signatures")
+        }
         for (expected, actual) in pending
             .transaction
             .signatures
