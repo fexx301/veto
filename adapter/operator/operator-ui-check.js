@@ -4,6 +4,7 @@ const { chromium } = require("playwright");
 const { Keypair, Transaction } = require("@solana/web3.js");
 
 const operatorKeypairPath = process.env.OPERATOR_KEYPAIR;
+const consoleUrl = process.env.VETO_URL || "http://127.0.0.1:4173";
 const externalOperator = operatorKeypairPath
   ? Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(operatorKeypairPath, "utf8"))))
   : null;
@@ -52,7 +53,7 @@ async function pressCurrentAction(page) {
   const statusWasHeld = new Promise((resolve) => { releaseHeldStatus = resolve; });
   disconnected.on("request", (request) => { if (request.method() === "POST") offlinePosts += 1; });
   await disconnected.route("**/api/status", (route) => { heldStatusRoute = route; releaseHeldStatus(); });
-  await disconnected.goto("http://127.0.0.1:4173", { waitUntil: "domcontentloaded" });
+  await disconnected.goto(consoleUrl, { waitUntil: "domcontentloaded" });
   await statusWasHeld;
   assert.equal(await disconnected.locator('[data-copy-value=""]:enabled').count(), 0);
   assert.equal(await disconnected.locator("[data-action]:enabled,#current-action:enabled").count(), 0);
@@ -96,7 +97,7 @@ async function pressCurrentAction(page) {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
-  await page.goto("http://127.0.0.1:4173", { waitUntil: "networkidle" });
+  await page.goto(consoleUrl, { waitUntil: "networkidle" });
   await page.locator("#connection-copy").waitFor({ state: "visible" });
   assert.equal(await page.locator("#connection-copy").textContent(), "Local validator");
   if (externalOperator) {

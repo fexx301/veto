@@ -32,7 +32,9 @@ fi
 RPC_URL="http://127.0.0.1:8899"
 # Refuse to run if another console or validator already holds the ports;
 # otherwise browser and HTTP checks would talk to that other process.
-for port in 4173 8899; do
+# VETO_PORT moves the console off 4173 if another app is using it.
+VETO_PORT="${VETO_PORT:-4173}"
+for port in "$VETO_PORT" 8899; do
   if lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
     echo "port $port is already in use; stop the other Veto console or validator first" >&2
     exit 1
@@ -191,6 +193,7 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
   fi
   env \
     OPERATOR_PUBKEY="$SERVER_OPERATOR_PUBKEY" \
+    BIND_ADDR="127.0.0.1:$VETO_PORT" \
     RPC_URL="$RPC_URL" \
     HUMAN_PATH="$WORK/human.json" \
     AGENT_PATH="$WORK/agent.json" \
@@ -204,7 +207,7 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
     "$ROOT/adapter/target/debug/operator_server" &
   SERVER_PID=$!
 
-  OPERATOR_URL="http://127.0.0.1:4173"
+  OPERATOR_URL="http://127.0.0.1:$VETO_PORT"
   OPERATOR_READY=0
   for _ in $(seq 1 120); do
     if curl --fail --silent "$OPERATOR_URL/api/status" >/dev/null 2>&1; then
@@ -223,7 +226,7 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
   fi
 
   if [[ "$RUN_MODE" == "--external-operator-browser" ]]; then
-    OPERATOR_KEYPAIR="$WORK/operator.json" npm --prefix adapter/operator test
+    VETO_URL="$OPERATOR_URL" OPERATOR_KEYPAIR="$WORK/operator.json" npm --prefix adapter/operator test
     echo "external-operator-browser-passed"
   elif [[ "$RUN_MODE" == "--external-operator-smoke" ]]; then
     post_action() {
