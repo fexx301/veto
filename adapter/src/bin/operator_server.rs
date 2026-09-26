@@ -29,7 +29,10 @@ use {
         env,
         io::{Read, Write},
         net::{TcpListener, TcpStream},
-        sync::{Arc, Mutex, TryLockError},
+        sync::{
+            atomic::{AtomicUsize, Ordering},
+            Arc, Mutex, TryLockError,
+        },
         thread,
         time::{Duration, Instant},
     },
@@ -46,6 +49,10 @@ const RUN_IDLE_TIMEOUT: Duration = Duration::from_secs(10 * 60);
 /// Refuse new hosted runs when the fee payer falls below this balance.
 const MIN_SETUP_LAMPORTS: u64 = 300_000_000;
 const COOKIE: &str = "veto_run";
+/// A request must arrive in full within this time, however slowly it trickles.
+const REQUEST_DEADLINE: Duration = Duration::from_secs(10);
+/// Connections handled at once; further connections get an immediate 503.
+const MAX_CONNECTIONS: usize = 64;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Phase {
@@ -737,9 +744,14 @@ struct Request {
 
 fn read_request(stream: &mut TcpStream) -> Result<Request> {
     stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+    let started = Instant::now();
+    let past_deadline = || started.elapsed() > REQUEST_DEADLINE;
     let mut bytes = Vec::with_capacity(2048);
     let mut chunk = [0u8; 2048];
     while bytes.len() < MAX_HEADER_BYTES && !bytes.windows(4).any(|w| w == b"\r\n\r\n") {
+        if past_deadline() {
+            bail!("request headers took too long")
+        }
         let read = stream.read(&mut chunk)?;
         if read == 0 {
             bail!("connection closed before request headers")
@@ -794,6 +806,9 @@ fn read_request(stream: &mut TcpStream) -> Result<Request> {
         bail!("request body exceeds the size limit")
     }
     while bytes.len() < header_end + content_length {
+        if past_deadline() {
+            bail!("request body took too long")
+        }
         let read = stream.read(&mut chunk)?;
         if read == 0 {
             bail!("connection closed before request body")
@@ -825,6 +840,7 @@ fn write_response(
         404 => "Not Found",
         405 => "Method Not Allowed",
         409 => "Conflict",
+        503 => "Service Unavailable",
         500 => "Internal Server Error",
         _ => "Response",
     };
@@ -854,6 +870,15 @@ fn json_response(stream: &mut TcpStream, result: Result<Value>, extra_headers: &
             &json!({ "error": error.to_string() }).to_string(),
             "",
         ),
+    }
+}
+
+/// Releases a connection slot when its thread ends, even on a panic.
+struct ConnectionSlot(Arc<AtomicUsize>);
+
+impl Drop for ConnectionSlot {
+    fn drop(&mut self) {
+        self.0.fetch_sub(1, Ordering::SeqCst);
     }
 }
 
@@ -1073,11 +1098,19 @@ fn main() -> Result<()> {
     let state = Arc::new(Mutex::new(state));
     let cached = Arc::new(Mutex::new(Value::Null));
     let listener = TcpListener::bind(&bind_addr).context("could not bind the operator port")?;
+    let active = Arc::new(AtomicUsize::new(0));
     for incoming in listener.incoming() {
         match incoming {
-            Ok(stream) => {
-                let (state, cached, config) = (state.clone(), cached.clone(), config.clone());
+            Ok(mut stream) => {
+                if active.fetch_add(1, Ordering::SeqCst) >= MAX_CONNECTIONS {
+                    active.fetch_sub(1, Ordering::SeqCst);
+                    let _ = write_response(&mut stream, 503, "text/plain; charset=utf-8", "Busy", "");
+                    continue;
+                }
+                let (state, cached, config, active) =
+                    (state.clone(), cached.clone(), config.clone(), active.clone());
                 thread::spawn(move || {
+                    let _slot = ConnectionSlot(active);
                     if let Err(error) = handle(stream, &state, &cached, &config) {
                         eprintln!("operator request failed: {error:#}");
                     }

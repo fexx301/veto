@@ -393,6 +393,24 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
       grep -q "$EXPECTED" <<<"$RESPONSE"
     done
     grep -q '"veto":"480.00"' <<<"$RESPONSE"
+    # A client that trickles one header byte every 3 s must be cut off at the
+    # server's 10 s request deadline rather than holding a thread open.
+    SLOW_SECONDS="$(python3 - "$VETO_PORT" <<'PY'
+import socket, sys, time
+sock = socket.create_connection(("127.0.0.1", int(sys.argv[1])))
+sock.sendall(b"GET / HTTP/1.1\r\nHost: 127.0.0.1\r\n")
+started = time.time()
+try:
+    for _ in range(20):
+        time.sleep(3)
+        sock.sendall(b"X")
+except OSError:
+    pass
+print(round(time.time() - started))
+PY
+)"
+    printf 'slow-client-cut-off-after=%ss\n' "$SLOW_SECONDS"
+    (( SLOW_SECONDS <= 20 ))
     echo "operator-smoke-passed"
   else
     echo "Open $OPERATOR_URL in a browser. Press Ctrl-C to stop and remove temporary demo state."
