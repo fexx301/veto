@@ -324,7 +324,10 @@ pub fn deploy(solana_bin: &str, rpc_url: &str, authority_path: &str, program_key
         .output()
         .context("could not run the Solana loader upgrade")?;
     if !output.status.success() {
-        bail!("upgrade failed: {}", String::from_utf8_lossy(&output.stderr));
+        // The loader's output names key files and the RPC endpoint; keep it in
+        // the operator's log rather than in an error a web client may see.
+        eprintln!("solana program deploy failed: {}", String::from_utf8_lossy(&output.stderr));
+        bail!("the program upgrade transaction failed");
     }
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_owned())
 }
