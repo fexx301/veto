@@ -260,7 +260,9 @@ impl Shared {
         if deployed_code_hash(&self.rpc, &self.target)? != self.reviewed_hash {
             self.upgrade_to(&self.pay_v1)?;
         }
-        let (_, initial_slot) = programdata_and_slot(&self.rpc, &self.target)?;
+        // Slot and hash from one snapshot: if the code changed after the check
+        // or the restore above, setup refuses rather than approving it.
+        let initial_slot = self.reviewed_slot()?;
         let protocol =
             read_keypair_file(&self.protocol_path).map_err(|error| anyhow!(error.to_string()))?;
         // The protocol team key pays for its own upgrade buffers.
