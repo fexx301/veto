@@ -42,6 +42,7 @@ const MAX_HEADER_BYTES: usize = 16 * 1024;
 const MAX_BODY_BYTES: usize = 256 * 1024;
 const INDEX_HTML: &str = include_str!("../../operator/index.html");
 const TOKENS_CSS: &str = include_str!("../../operator/tokens.css");
+const APP_JS: &str = include_str!("../../operator/app.js");
 const WALLET_CLIENT_JS: &str = include_str!("../../operator/wallet-client.bundle.js");
 const FAVICON_SVG: &str = include_str!("../../operator/brand/favicon.svg");
 /// A hosted run nobody has touched for this long can be taken over. Every
@@ -878,7 +879,7 @@ fn write_response(
         _ => "Response",
     };
     let headers = format!(
-        "HTTP/1.1 {status} {reason}\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\nContent-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'\r\n{extra_headers}\r\n",
+        "HTTP/1.1 {status} {reason}\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\nContent-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'\r\n{extra_headers}\r\n",
         body.len()
     );
     stream.write_all(headers.as_bytes())?;
@@ -979,6 +980,13 @@ fn handle(
         ("GET", "/tokens.css") => {
             write_response(&mut stream, 200, "text/css; charset=utf-8", TOKENS_CSS, "")
         },
+        ("GET", "/app.js") => write_response(
+            &mut stream,
+            200,
+            "text/javascript; charset=utf-8",
+            APP_JS,
+            "",
+        ),
         ("GET", "/wallet-client.js") => write_response(
             &mut stream,
             200,
