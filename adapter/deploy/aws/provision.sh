@@ -97,6 +97,9 @@ sudo install -m 644 "$SRC/adapter/deploy/aws/veto.service" /etc/systemd/system/v
 sudo tee /etc/caddy/Caddyfile >/dev/null <<CADDY
 $DOMAIN {
   encode gzip
+  header Strict-Transport-Security "max-age=31536000"
+  # Caddy replaces any X-Forwarded-For a client sends; the server uses it
+  # for its per-client run limit.
   reverse_proxy 127.0.0.1:4173
 }
 CADDY

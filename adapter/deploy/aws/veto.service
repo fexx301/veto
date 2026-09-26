@@ -2,6 +2,9 @@
 Description=Veto operator console (devnet demo)
 After=network-online.target
 Wants=network-online.target
+# Give up after repeated crashes instead of restarting forever.
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 User=veto
@@ -11,11 +14,32 @@ Environment=HOME=/var/lib/veto
 ExecStart=/opt/veto/operator_server
 Restart=on-failure
 RestartSec=5
+UMask=0077
 NoNewPrivileges=true
+CapabilityBoundingSet=
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
+PrivateDevices=true
 ReadWritePaths=/var/lib/veto
+# Other local users cannot read this process's arguments (the loader
+# upgrade receives the RPC URL on its command line).
+ProtectProc=invisible
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+MemoryMax=1G
+TasksMax=512
 
 [Install]
 WantedBy=multi-user.target
