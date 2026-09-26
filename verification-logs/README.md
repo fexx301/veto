@@ -276,3 +276,15 @@ An external read-only review raised findings on Veto and on the Swig code in the
 - **No CI.** `.github/workflows/ci.yml` runs host tests, client builds, a bundle-freshness check and SBF builds.
 
 Logs: `2026-09-26-review-fix-*`. The remaining findings from the same review concern upstream Swig code, which Veto neither vendors nor uses in the affected paths; they were handled with the Swig maintainers separately.
+
+## Follow-up review fixes — 2026-09-26
+
+A second external review of this repository (source review plus an offline signing reproduction) found three medium issues, all fixed:
+
+- **Approval signing was too permissive.** Refusing a writable operator did not stop an SPL Token transfer, which needs its owner only as a read-only signer. The browser bridge and the standalone signer now accept only the exact instructions an approval contains: Veto gate initialize, reapprove or approve-program with the operator as the authority account; Swig `AddAuthorityV1` by the root role adding a `ProgramExec` role bound to the gate; and System instructions that do not involve the operator. Signer unit tests cover the reviewer's token-transfer case and the case of adding a non-Veto role as root; a throwaway Node check of the browser bundle refused the same cases.
+- **Public errors could expose RPC credentials.** Error responses now redact any URL and log the full error on the server (unit-tested).
+- **Automatic setup had a hash/slot race.** It now takes the slot from the single-snapshot review check.
+
+Verified end to end: `--external-operator-smoke` (real setup and reapproval transactions accepted by the stricter signer; agent-key signing still refused), `--external-operator-browser`, and `--operator-smoke`. Logs: `2026-09-26-followup-fix-*`.
+
+Remaining assurance gaps, as the reviewer noted: CI does not run the local-validator or browser flows (they run locally through the runner), and independent source-to-deployed-byte reproduction of the gate is not set up.
