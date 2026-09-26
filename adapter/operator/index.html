@@ -375,7 +375,10 @@
       const currentAction = document.getElementById("current-action");
       currentAction.dataset.currentAction = enabled;
       currentAction.textContent = actionLabel(enabled);
-      currentAction.disabled = busy || !enabled;
+      // Never offer an approval for code that differs from the reviewed build.
+      const approvalBlocked = (enabled === "approve" || enabled === "reapprove") && !matches;
+      if (approvalBlocked) currentAction.textContent = "Deployed code not reviewed";
+      currentAction.disabled = busy || !enabled || approvalBlocked;
       currentAction.setAttribute("aria-busy", busy ? "true" : "false");
       for (const key of actions) {
         const row = document.querySelector('[data-step="' + key + '"]');
@@ -384,7 +387,7 @@
         row.querySelector(".step-status").textContent = state === "complete" ? "Done" : state === "blocked" ? "Blocked" : state === "active" ? "Next" : "Waiting";
       }
       for (const button of document.querySelectorAll("[data-action]")) {
-        button.disabled = busy || button.dataset.action !== enabled;
+        button.disabled = busy || button.dataset.action !== enabled || approvalBlocked;
         button.setAttribute("aria-busy", busy && button.dataset.action === enabled ? "true" : "false");
       }
       announceWorkflow(data, headline, enabled);

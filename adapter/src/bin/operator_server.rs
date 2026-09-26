@@ -203,6 +203,17 @@ impl Shared {
         })
     }
 
+    /// The current deployment slot, provided the deployed code is the build
+    /// the operator reviewed. Every approval path goes through this, so the
+    /// console never prepares or signs an approval for unreviewed code.
+    fn reviewed_slot(&self) -> Result<u64> {
+        let (slot, hash) = deployment_snapshot(&self.rpc, &self.target)?;
+        if hash != self.reviewed_hash {
+            bail!("the deployed code does not match the reviewed build; this console will not approve it")
+        }
+        Ok(slot)
+    }
+
     fn upgrade_to(&self, so: &str) -> Result<(u64, u64, String)> {
         let (_, old_slot) = programdata_and_slot(&self.rpc, &self.target)?;
         let output =
@@ -399,8 +410,7 @@ impl DemoState {
 
     fn status(&self, caller: Option<&str>) -> Result<Value> {
         let shared = &self.shared;
-        let (_, current_slot) = programdata_and_slot(&shared.rpc, &shared.target)?;
-        let current_hash = deployed_code_hash(&shared.rpc, &shared.target)?;
+        let (current_slot, current_hash) = deployment_snapshot(&shared.rpc, &shared.target)?;
         let mut status = json!({
             "hosted": shared.hosted,
             "rpcUrl": shared.rpc_url,
@@ -463,7 +473,7 @@ impl DemoState {
         self.owned_run(caller)?;
         let shared = &self.shared;
         let run = self.run.as_mut().ok_or_else(|| anyhow!("start a run first"))?;
-        let (_, reviewed_slot) = programdata_and_slot(&shared.rpc, &shared.target)?;
+        let reviewed_slot = shared.reviewed_slot()?;
         let (instructions, initializes_policy) = match run.phase {
             Phase::AwaitingApproval => (
                 run.guarded.setup_ixs(
@@ -656,7 +666,7 @@ impl DemoState {
                 });
             },
             ("reapprove", Phase::Fixed) if run.operator == shared.setup.pubkey() => {
-                let (_, current_slot) = programdata_and_slot(rpc, &shared.target)?;
+                let current_slot = shared.reviewed_slot()?;
                 let signature = send(
                     rpc,
                     &shared.setup,

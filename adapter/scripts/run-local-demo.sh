@@ -313,6 +313,26 @@ if [[ "$RUN_MODE" == "--operator" || "$RUN_MODE" == "--operator-smoke" || "$RUN_
     grep -q '"phase":"fixed"' <<<"$RESPONSE"
     grep -q '"codeMatchesReviewed":true' <<<"$RESPONSE"
 
+    # Regression: code changed out-of-band while the page phase still says
+    # "fixed". The console must refuse to prepare an approval for it.
+    out_of_band_deploy() {
+      "$SOLANA" program deploy --url "$RPC_URL" --keypair "$WORK/protocol.json" \
+        --upgrade-authority "$WORK/protocol.json" --program-id "$WORK/pay.json" "$1" >/dev/null
+      sleep 2
+    }
+    out_of_band_deploy "$ROOT/$PAY_DEPLOY/merchant_pay_v2.so"
+    UNREVIEWED_FIXED="$(curl --silent --show-error \
+      --header "Origin: $OPERATOR_URL" \
+      --header "Content-Type: application/json" \
+      --request POST --data '{}' \
+      --write-out $'\n%{http_code}' \
+      "$OPERATOR_URL/api/operator/approval-transaction")"
+    printf 'out-of-band-upgrade-approval=%s\n' "$UNREVIEWED_FIXED"
+    grep -q 'does not match the reviewed build' <<<"$UNREVIEWED_FIXED"
+    [[ "${UNREVIEWED_FIXED##*$'\n'}" == "409" ]]
+    out_of_band_deploy "$ROOT/$PAY_DEPLOY/merchant_pay_v1.so"
+    echo "out-of-band-unreviewed-approval-refused"
+
     BACKEND_REAPPROVE="$(curl --silent --show-error \
       --header "Origin: $OPERATOR_URL" \
       --header "Content-Type: application/json" \

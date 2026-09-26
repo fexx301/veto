@@ -157,6 +157,19 @@ pub fn deployed_code_hash(rpc: &RpcClient, program: &Pubkey) -> Result<String> {
     Ok(hex(&hash(trim_trailing_zeros(&data[metadata_len..])).to_bytes()))
 }
 
+/// Deployment slot and code hash read from one ProgramData snapshot, so an
+/// approval can never pair the slot of one deployment with the hash of
+/// another.
+pub fn deployment_snapshot(rpc: &RpcClient, program: &Pubkey) -> Result<(u64, String)> {
+    let data = rpc.get_account_data(&get_program_data_address(program))?;
+    let metadata_len = UpgradeableLoaderState::size_of_programdata_metadata();
+    let slot = match bincode::deserialize(&data[..metadata_len])? {
+        UpgradeableLoaderState::ProgramData { slot, .. } => slot,
+        _ => bail!("canonical ProgramData has an unexpected loader state"),
+    };
+    Ok((slot, hex(&hash(trim_trailing_zeros(&data[metadata_len..])).to_bytes())))
+}
+
 /// The same hash computed over a local build, for comparison.
 pub fn file_code_hash(path: &str) -> Result<String> {
     let bytes = fs::read(path).with_context(|| format!("could not read {path}"))?;
