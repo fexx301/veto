@@ -827,6 +827,34 @@ fn read_request(stream: &mut TcpStream) -> Result<Request> {
     })
 }
 
+/// The error text returned to visitors. The full error is logged on the
+/// server; the public copy has any URL replaced, because RPC transport errors
+/// include the RPC URL and a provider URL can carry an API key.
+fn public_error(error: &anyhow::Error) -> String {
+    eprintln!("request error: {error:#}");
+    redact_urls(&error.to_string())
+}
+
+fn redact_urls(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(start) = ["http://", "https://", "ws://", "wss://"]
+        .iter()
+        .filter_map(|scheme| rest.find(scheme))
+        .min()
+    {
+        out.push_str(&rest[..start]);
+        out.push_str("<redacted>");
+        let tail = &rest[start..];
+        let end = tail
+            .find(|c: char| c.is_whitespace() || matches!(c, ')' | '"' | '\'' | ',' | ']' | '>'))
+            .unwrap_or(tail.len());
+        rest = &tail[end..];
+    }
+    out.push_str(rest);
+    out
+}
+
 fn write_response(
     stream: &mut TcpStream,
     status: u16,
@@ -868,7 +896,7 @@ fn json_response(stream: &mut TcpStream, result: Result<Value>, extra_headers: &
             stream,
             409,
             "application/json; charset=utf-8",
-            &json!({ "error": error.to_string() }).to_string(),
+            &json!({ "error": public_error(&error) }).to_string(),
             "",
         ),
     }
@@ -901,7 +929,7 @@ fn handle(
     let request = match read_request(&mut stream) {
         Ok(request) => request,
         Err(error) => {
-            let body = json!({ "error": error.to_string() }).to_string();
+            let body = json!({ "error": public_error(&error) }).to_string();
             let _ = write_response(&mut stream, 400, "application/json; charset=utf-8", &body, "");
             return Ok(());
         },
@@ -981,7 +1009,7 @@ fn handle(
                     &mut stream,
                     500,
                     "application/json; charset=utf-8",
-                    &json!({ "error": error.to_string() }).to_string(),
+                    &json!({ "error": public_error(&error) }).to_string(),
                     "",
                 ),
             }
@@ -1121,4 +1149,23 @@ fn main() -> Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::redact_urls;
+
+    #[test]
+    fn redacts_rpc_urls_with_keys() {
+        let message = "error sending request for url (https://rpc.example.com/?api-key=SECRET): timed out";
+        let redacted = redact_urls(message);
+        assert!(!redacted.contains("SECRET") && !redacted.contains("example.com"));
+        assert_eq!(redacted, "error sending request for url (<redacted>): timed out");
+    }
+
+    #[test]
+    fn keeps_ordinary_messages() {
+        let message = "the deployed code does not match the reviewed build; this console will not approve it";
+        assert_eq!(redact_urls(message), message);
+    }
 }
