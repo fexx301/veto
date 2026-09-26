@@ -460,7 +460,32 @@
       const link = explorerUrl("tx", signature === "local transaction" ? "" : signature);
       const plainSignature = (data.latest.detail.match(/Plain allowlist signature:\s*([1-9A-HJ-NP-Za-km-z]+)/) || [])[1];
       const plainLink = explorerUrl("tx", plainSignature);
-      row.innerHTML = '<span class="event-index">' + String(eventCount).padStart(2, "0") + '</span><div class="event-operation"><strong>' + meta[0] + ' · ' + meta[1] + '</strong><button class="copy-value" type="button" data-copy-value="' + signature + '" aria-label="Copy full transaction signature">' + shortAddress(signature) + '</button>' + (link ? '<a class="explorer-link" href="' + link + '" target="_blank" rel="noopener">explorer ↗</a>' : '') + (plainLink ? '<a class="explorer-link" href="' + plainLink + '" target="_blank" rel="noopener">plain wallet tx ↗</a>' : '') + '</div><div class="event-slots"><span>approved ' + data.approvedSlot + '</span><span>observed ' + data.currentSlot + '</span></div><span class="event-verdict">' + meta[2] + '</span>';
+      // Built with DOM nodes and textContent only: no server-supplied value is
+      // ever parsed as HTML.
+      const el = (tag, className, text) => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = String(text);
+        return node;
+      };
+      const operation = el("div", "event-operation");
+      operation.append(el("strong", "", meta[0] + " · " + meta[1]));
+      const copy = el("button", "copy-value", shortAddress(signature));
+      copy.type = "button";
+      copy.dataset.copyValue = signature;
+      copy.setAttribute("aria-label", "Copy full transaction signature");
+      operation.append(copy);
+      for (const [href, text] of [[link, "explorer ↗"], [plainLink, "plain wallet tx ↗"]]) {
+        if (!href) continue;
+        const anchor = el("a", "explorer-link", text);
+        anchor.href = href;
+        anchor.target = "_blank";
+        anchor.rel = "noopener";
+        operation.append(anchor);
+      }
+      const slots = el("div", "event-slots");
+      slots.append(el("span", "", "approved " + data.approvedSlot), el("span", "", "observed " + data.currentSlot));
+      row.append(el("span", "event-index", String(eventCount).padStart(2, "0")), operation, slots, el("span", "event-verdict", meta[2]));
       sessionLedger.appendChild(row);
     }
 
