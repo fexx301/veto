@@ -536,6 +536,10 @@
           button.setAttribute("aria-busy", "false");
           button.textContent = priorTexts[index];
         });
+        // Restoring the pre-click text would leave the main button showing the
+        // previous step until the next status refresh; redraw from the latest
+        // status immediately so its label always matches what it will do.
+        if (lastStatus) renderStatus(lastStatus);
         await refresh(!actionFailed);
       }
     }
