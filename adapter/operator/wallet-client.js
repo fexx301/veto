@@ -33,6 +33,21 @@ export function serializeTransaction(transaction, requireAllSignatures = true) {
   }));
 }
 
+// An approval only ever needs the operator as a read-only signer. Refuse any
+// transaction where the operator pays fees or is writable, so signing an
+// approval can never move the operator's funds or alter its accounts.
+export function checkOperatorRole(transaction, operator) {
+  if (transaction.feePayer?.toString() === operator) {
+    throw new Error("Refusing to sign: the operator would pay the transaction fee.");
+  }
+  const message = transaction.compileMessage();
+  const index = message.accountKeys.findIndex((key) => key.toString() === operator);
+  if (index < 0) throw new Error("Refusing to sign: the operator is not part of this transaction.");
+  if (message.isAccountWritable(index)) {
+    throw new Error("Refusing to sign: the operator account would be writable.");
+  }
+}
+
 export async function signApproval(encoded, expectedOperator) {
   const provider = injectedProvider();
   const connection = await provider.connect();
@@ -41,6 +56,7 @@ export async function signApproval(encoded, expectedOperator) {
     throw new Error(`Connect the configured operator wallet ${expectedOperator}.`);
   }
   const transaction = deserializeTransaction(encoded);
+  checkOperatorRole(transaction, expectedOperator);
   const signed = await provider.signTransaction(transaction);
   return serializeTransaction(signed);
 }
