@@ -503,8 +503,10 @@ fn check_route(
         let account = find(key).ok_or_else(|| gate_error(error::ROUTE_ACCOUNT_MISSING))?;
         let owner = account.owner;
         if *owner == bpf_loader_upgradeable::id() {
-            let state: Result<UpgradeableLoaderState, _> = deserialize(&account.try_borrow_data()?);
-            if !matches!(state, Ok(UpgradeableLoaderState::Program { .. })) {
+            // Fail closed on loader-owned bytes that do not decode.
+            let state: UpgradeableLoaderState = deserialize(&account.try_borrow_data()?)
+                .map_err(|_| gate_error(error::UNSUPPORTED_LOADER))?;
+            if !matches!(state, UpgradeableLoaderState::Program { .. }) {
                 continue; // ProgramData and buffers are not callable
             }
             let approved = policy
