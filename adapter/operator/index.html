@@ -152,8 +152,14 @@
       .trust-node, .trust-node:nth-child(2n) { border-right: var(--rule-thin); border-bottom: 0; }
       .trust-node:last-child { border-right: 0; }
       .trust-node::after { top: 50%; right: -.65rem; bottom: auto; left: auto; transform: translateY(-50%); content: "→"; }
-      .trust-readout { grid-template-columns: minmax(0,1fr) minmax(15rem,.7fr) auto; align-items: center; }
-      .current-action { width: auto; }
+      /* Mid widths: state on its own row, slots and actions below. */
+      .trust-readout { grid-template-columns: minmax(0,1fr) auto; align-items: center; }
+      .readout-main { grid-column: 1 / -1; }
+      /* The button fits its label (with a steady minimum so it does not jump
+         between steps); the hint wraps under it instead of widening it. */
+      .readout-actions { justify-items: center; }
+      .current-action { width: auto; min-width: 15rem; padding-inline: var(--space-md); }
+      .wallet-hint { max-width: 17rem; text-align: center; }
       .hero-cta { display: none; }
       .boundary-note { grid-template-columns: minmax(0,1.15fr) minmax(18rem,.85fr); }
       .event-row { grid-template-columns: 1.5rem minmax(0,1.35fr) minmax(8rem,.8fr) auto; align-items: center; }
@@ -172,6 +178,8 @@
       .console-grid { padding-block-start: var(--space-md); }
       .console-grid { grid-template-columns: minmax(0,1.05fr) minmax(23rem,.95fr); }
       .evidence-console { position: sticky; top: var(--space-lg); align-self: start; }
+      .trust-readout { grid-template-columns: minmax(0,1fr) minmax(15rem,.7fr) auto; }
+      .readout-main { grid-column: auto; }
     }
     @media (prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } *,*::before,*::after { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
     .wallet-compare { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); border: var(--rule-strong); border-top: 0; background: var(--color-paper); }
