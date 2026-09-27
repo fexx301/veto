@@ -46,6 +46,41 @@ Veto also trusts the programs it cannot pin itself:
   held off the hosted server; finalizing the gate would remove it entirely,
   and is deferred so fixes can still be deployed.
 
+## Why a deployment slot identifies code
+
+Veto stores a deployment slot, not a code hash. That is enough because, in
+the upgradeable loader (`solana-bpf-loader-program` 3.1.12, `process_instruction`):
+
+- program bytes reach ProgramData only through `Upgrade` (and `DeployWithMaxDataLen`
+  at creation); `Write` only writes buffers;
+- `Upgrade` records the current slot and refuses a second upgrade in the same
+  slot ("Program was deployed in this block already"), so two different codes
+  cannot share one slot;
+- a closed program cannot be redeployed at its address, and `Migrate` moves a
+  program to loader v4, which the gate refuses (`UNSUPPORTED_LOADER`,
+  `TARGET_MISMATCH`).
+
+Hashing each program on-chain on every delegated call would cost tens of
+thousands of compute units per program for no additional guarantee. What the
+operator reviews is still off-chain: the console compares the deployed code
+hash with the reviewed build before it prepares an approval.
+
+## Review decisions
+
+- **Pinning Swig's own slot (not done).** A replaced Swig program would not
+  need to call the gate at all, so pinning it inside Veto cannot stop that;
+  Swig's upgrade authority is a stated trust dependency (above).
+- **Open hosted demo (by design).** Anyone may start a run so judges and
+  users can try it without an account. Runs are per-visitor (cookie),
+  limited per client and overall, time-capped, and the demo operator's
+  server-held root is labelled on the page. All status fields are public
+  devnet addresses and balances.
+- **Role id not bound in the policy.** Another role in the same wallet (for
+  example a session role) bypasses Veto, but only the wallet root can create
+  one; see "What Veto does not constrain".
+- **Reserved programs.** The wallet program and the gate can never be a
+  delegated call's target or route (`RESERVED_PROGRAM`, 23).
+
 ## Findings
 
 **F1 — The delegated route has no agent identity (critical before any value-moving demo; source inference).**
