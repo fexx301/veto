@@ -76,8 +76,10 @@ lamports() { sol balance --lamports "$1" | awk '{print $1}'; }
 (( $(lamports "$PROTOCOL") >= 500000000 )) || sol transfer --allow-unfunded-recipient "$PROTOCOL" 1 >/dev/null
 (( $(lamports "$AGENT") >= 100000000 )) || sol transfer --allow-unfunded-recipient "$AGENT" 0.2 >/dev/null
 # Deploy merchant-pay only if it is missing or not the reviewed v1 build.
-PAY_DEPLOYED="$(sol program dump "$PAY_ID" "$DIR/pay-deployed.so" >/dev/null 2>&1 && shasum -a 256 "$DIR/pay-deployed.so" | cut -d' ' -f1 || true)"
-PAY_V1_HASH="$(shasum -a 256 "$PAY_DEPLOY/merchant_pay_v1.so" | cut -d' ' -f1)"
+# A dump carries the ProgramData's zero padding; compare with it trimmed.
+trimmed_hash() { python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read().rstrip(b"\0")).hexdigest())' "$1"; }
+PAY_DEPLOYED="$(sol program dump "$PAY_ID" "$DIR/pay-deployed.so" >/dev/null 2>&1 && trimmed_hash "$DIR/pay-deployed.so" || true)"
+PAY_V1_HASH="$(trimmed_hash "$PAY_DEPLOY/merchant_pay_v1.so")"
 rm -f "$DIR/pay-deployed.so"
 if [[ "$PAY_DEPLOYED" != "$PAY_V1_HASH" ]]; then
   sol program deploy --program-id "$DIR/pay.json" --upgrade-authority "$DIR/protocol.json" "$PAY_DEPLOY/merchant_pay_v1.so"
