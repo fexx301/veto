@@ -49,6 +49,9 @@ const FAVICON_SVG: &str = include_str!("../../operator/brand/favicon.svg");
 /// step completes in well under a minute, so an abandoned run should not
 /// keep the next visitor waiting long.
 const RUN_IDLE_TIMEOUT: Duration = Duration::from_secs(3 * 60);
+/// A hosted run can be taken over after this long however active it is, so
+/// one visitor cannot hold the demo indefinitely.
+const RUN_MAX_DURATION: Duration = Duration::from_secs(15 * 60);
 /// Refuse new hosted runs when the fee payer falls below this balance.
 const MIN_SETUP_LAMPORTS: u64 = 300_000_000;
 const COOKIE: &str = "veto_run";
@@ -118,6 +121,9 @@ struct Shared {
 /// One visitor's scenario: two fresh Swig wallets and a fresh Veto policy.
 struct Run {
     token: String,
+    started: Instant,
+    /// Refreshed only by a step that succeeded, so rejected requests cannot
+    /// keep a run alive.
     last_activity: Instant,
     operator: Pubkey,
     policy: Keypair,
@@ -380,6 +386,7 @@ impl Shared {
         };
         Ok(Run {
             token: new_token(),
+            started: Instant::now(),
             last_activity: Instant::now(),
             operator,
             policy,
@@ -421,6 +428,7 @@ impl DemoState {
             Some(run) => {
                 run.phase == Phase::Resumed
                     || run.last_activity.elapsed() > RUN_IDLE_TIMEOUT
+                    || run.started.elapsed() > RUN_MAX_DURATION
                     || caller == Some(run.token.as_str())
             },
         }
@@ -519,8 +527,14 @@ impl DemoState {
         if hosted && caller != Some(run.token.as_str()) {
             bail!("this run belongs to another visitor")
         }
-        run.last_activity = Instant::now();
         Ok(run)
+    }
+
+    /// Marks the caller's run as active after a step succeeded.
+    fn touch(&mut self, caller: Option<&str>) {
+        if let Ok(run) = self.owned_run(caller) {
+            run.last_activity = Instant::now();
+        }
     }
 
     fn prepare_operator_approval(&mut self, caller: Option<&str>) -> Result<Value> {
@@ -1125,6 +1139,9 @@ fn handle(
                 return json_response(&mut stream, Err(busy()), "");
             };
             let result = guard.prepare_operator_approval(caller);
+            if result.is_ok() {
+                guard.touch(caller);
+            }
             drop(guard);
             json_response(&mut stream, result, "")
         },
@@ -1142,6 +1159,9 @@ fn handle(
                         .ok_or_else(|| anyhow!("approval submission is missing transaction"))
                 })
                 .and_then(|transaction| guard.submit_operator_approval(&transaction, caller));
+            if result.is_ok() {
+                guard.touch(caller);
+            }
             drop(guard);
             json_response(&mut stream, remember(result), "")
         },
@@ -1151,6 +1171,9 @@ fn handle(
             };
             let action = path.trim_start_matches("/api/action/");
             let result = guard.act(action, caller);
+            if result.is_ok() {
+                guard.touch(caller);
+            }
             drop(guard);
             json_response(&mut stream, remember(result), "")
         },
