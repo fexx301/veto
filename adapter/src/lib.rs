@@ -56,6 +56,7 @@ mod error {
     pub const ROUTE_PROGRAM_CHANGED: u32 = 20;
     pub const ROUTE_FULL: u32 = 21;
     pub const UNSUPPORTED_LOADER: u32 = 22;
+    pub const RESERVED_PROGRAM: u32 = 23;
 }
 
 fn gate_error(code: u32) -> ProgramError {
@@ -167,6 +168,7 @@ fn initialize(program_id: &Pubkey, accounts: &[AccountInfo], expected_slot: u64)
     if !policy.is_signer {
         return Err(gate_error(error::POLICY_NOT_SIGNER));
     }
+    reject_reserved(target.key, swig.key, program_id)?;
     let slot = deployment_slot(target, programdata)?;
     if slot != expected_slot {
         return Err(gate_error(error::REVIEWED_SLOT_MISMATCH));
@@ -260,6 +262,7 @@ fn approve_route_program(
     if policy.swig_wallet() != swig_wallet.key.to_bytes() {
         return Err(gate_error(error::SWIG_WALLET_MISMATCH));
     }
+    reject_reserved(program.key, swig.key, program_id)?;
     let slot = deployment_slot(program, programdata)?;
     if slot != expected_slot {
         return Err(gate_error(error::REVIEWED_SLOT_MISMATCH));
@@ -342,7 +345,7 @@ fn authorize_next_swig(
     let expected_swig = Pubkey::new_from_array(policy.swig());
     validate_next_swig_instruction(&next, &expected_swig, target.key)?;
     validate_swig_account_binding(&next, swig_config.key, swig_wallet.key)?;
-    check_route(accounts, &policy, target.key, &inner_account_keys(&next)?)?;
+    check_route(program_id, accounts, &policy, target.key, &inner_account_keys(&next)?)?;
     reject_later_swig_instructions(instructions, current + 2, &expected_swig)
 }
 
@@ -430,7 +433,8 @@ fn reject_later_swig_instructions(
     start: usize,
     expected_swig: &Pubkey,
 ) -> ProgramResult {
-    for index in start..=u8::MAX as usize {
+    // The instructions sysvar indexes with u16; scan until it runs out.
+    for index in start..=u16::MAX as usize {
         match load_instruction_at_checked(index, instructions) {
             Ok(instruction) if instruction.program_id == *expected_swig => {
                 return Err(gate_error(error::LATER_SWIG_INSTRUCTION));
@@ -492,13 +496,16 @@ pub fn inner_account_keys(next: &Instruction) -> Result<Vec<Pubkey>, ProgramErro
 /// loader-v4 programs are refused. Each inner account must be passed to this
 /// instruction so its owner and state can be read.
 fn check_route(
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
     policy: &Policy,
     target: &Pubkey,
     inner_keys: &[Pubkey],
 ) -> ProgramResult {
     let find = |key: &Pubkey| accounts.iter().find(|account| account.key == key);
+    let swig = Pubkey::new_from_array(policy.swig());
     for key in inner_keys {
+        reject_reserved(key, &swig, program_id)?;
         if key == target {
             continue;
         }
@@ -527,6 +534,16 @@ fn check_route(
             return Err(gate_error(error::UNSUPPORTED_LOADER));
         }
         // Native builtins and ordinary data accounts need no approval.
+    }
+    Ok(())
+}
+
+/// The wallet program and this gate can never be a delegated call's target or
+/// route: re-entering either from inside the protected call is not a payment
+/// route, and approving one would let a nested call reach the proof.
+fn reject_reserved(program: &Pubkey, swig: &Pubkey, gate: &Pubkey) -> ProgramResult {
+    if program == swig || program == gate {
+        return Err(gate_error(error::RESERVED_PROGRAM));
     }
     Ok(())
 }
