@@ -8,7 +8,7 @@ set -euo pipefail
 : "${HOST:?set HOST=ubuntu@<ip>}" "${DOMAIN:?set DOMAIN}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 KEYS="${VETO_DEVNET_DIR:-$HOME/.config/veto-devnet}"
-SSH=(ssh -o StrictHostKeyChecking=accept-new ${SSH_KEY:+-i "$SSH_KEY"})
+SSH=(ssh -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 ${SSH_KEY:+-i "$SSH_KEY"})
 PAY="adapter/fixtures/merchant-pay/target/deploy"
 # Host names are interpolated into the remote command and the Caddyfile.
 for name in "$DOMAIN" "${REDIRECT_FROM:-}"; do
