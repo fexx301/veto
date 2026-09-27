@@ -1,0 +1,726 @@
+Veto local demo
+Veto commit: e06b7bb7d450b9be0a37d3eead8dd663ebe76708
+solana-cli 4.2.1 (src:c4b48df9; feat:21b0d33a, client:Agave)
+cargo-build-sbf 4.1.0
+platform-tools v1.54
+rustc 1.89.0
+rustc 1.91.0 (f8297e351 2025-10-28)
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 4 warnings
+warning: function `send_failure` is never used
+   --> src/bin/../demo/payment.rs:128:8
+    |
+128 | pub fn send_failure(rpc: &RpcClient, payer: &Keypair, instructions: Vec<Instruction>) -> Result<String> {
+    |        ^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `deployment_snapshot` is never used
+   --> src/bin/../demo/payment.rs:193:8
+    |
+193 | pub fn deployment_snapshot(rpc: &RpcClient, program: &Pubkey) -> Result<(u64, String)> {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: function `trim_trailing_zeros` is never used
+   --> src/bin/../demo/payment.rs:171:4
+    |
+171 | fn trim_trailing_zeros(bytes: &[u8]) -> &[u8] {
+    |    ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `hex` is never used
+   --> src/bin/../demo/payment.rs:176:4
+    |
+176 | fn hex(bytes: &[u8]) -> String {
+    |    ^^^
+
+warning: function `deployed_code_hash` is never used
+   --> src/bin/../demo/payment.rs:182:8
+    |
+182 | pub fn deployed_code_hash(rpc: &RpcClient, program: &Pubkey) -> Result<String> {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `file_code_hash` is never used
+   --> src/bin/../demo/payment.rs:208:8
+    |
+208 | pub fn file_code_hash(path: &str) -> Result<String> {
+    |        ^^^^^^^^^^^^^^
+
+warning: function `pay_ix` is never used
+   --> src/bin/../demo/payment.rs:281:8
+    |
+281 | pub fn pay_ix(pay: Pubkey, source: Pubkey, merchant: Pubkey, wallet: Pubkey, amount: u64) -> Instruction {
+    |        ^^^^^^
+
+warning: methods `payment` and `approved_slot` are never used
+   --> src/bin/../demo/payment.rs:396:12
+    |
+376 | impl Guarded {
+    | ------------ methods in this implementation
+...
+396 |     pub fn payment(&self, agent: Pubkey, inner: Instruction) -> Result<Vec<Instruction>> {
+    |            ^^^^^^^
+...
+498 |     pub fn approved_slot(&self, rpc: &RpcClient) -> Result<Option<u64>> {
+    |            ^^^^^^^^^^^^^
+
+warning: `veto-swig-gate` (bin "payment_flow") generated 2 warnings
+warning: `veto-swig-gate` (bin "operator_server") generated 1 warning (1 duplicate)
+warning: `veto-swig-gate` (bin "route_flow") generated 7 warnings (1 duplicate)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests/real_swig_payload.rs (adapter/target/debug/deps/real_swig_payload-daae0a8b6f4af61b)
+
+running 7 tests
+test rejects_a_non_swig_instruction_even_if_it_mentions_the_target ... ok
+test accepts_the_real_swig_builder_payload_for_the_pinned_target ... ok
+test exposes_every_account_the_delegated_call_receives ... ok
+test rejects_explicit_earlier_proof_indices_from_the_real_swig_builder ... ok
+test rejects_a_second_real_swig_call_that_could_reuse_the_first_proof ... ok
+test rejects_reusing_the_proof_with_another_inner_target ... ok
+test binds_the_gate_proof_to_the_config_and_wallet_of_the_real_swig_call ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.19s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:11:1
+   |
+11 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: no expected values for `feature`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:11:1
+   |
+11 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: no expected values for `feature`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-relay` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.11s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:10:1
+   |
+10 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: no expected values for `feature`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:10:1
+   |
+10 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: no expected values for `feature`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-demo-target` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.11s
+   Compiling veto-merchant-pay v0.1.0 (/Users/femi/Documents/IdeaCenter/spikes/veto/adapter/fixtures/merchant-pay)
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:12:1
+   |
+12 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `drain`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:12:1
+   |
+12 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `drain`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-merchant-pay` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.21s
+   Compiling veto-merchant-pay v0.1.0 (/Users/femi/Documents/IdeaCenter/spikes/veto/adapter/fixtures/merchant-pay)
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:12:1
+   |
+12 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `drain`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:12:1
+   |
+12 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `drain`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-merchant-pay` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.22s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:11:1
+   |
+11 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: no expected values for `feature`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:11:1
+   |
+11 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: no expected values for `feature`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-payment-router` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.11s
+warning: unexpected `cfg` condition value: `custom-heap`
+ --> src/lib.rs:6:1
+  |
+6 | entrypoint!(process_instruction);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: no expected values for `feature`
+  = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+  = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+  = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+  = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+  = note: `#[warn(unexpected_cfgs)]` on by default
+  = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+ --> src/lib.rs:6:1
+  |
+6 | entrypoint!(process_instruction);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: no expected values for `feature`
+  = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+  = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+  = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+  = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+  = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-sneaky-cpi` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.11s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 4 warnings
+warning: function `send_failure` is never used
+   --> src/bin/../demo/payment.rs:128:8
+    |
+128 | pub fn send_failure(rpc: &RpcClient, payer: &Keypair, instructions: Vec<Instruction>) -> Result<String> {
+    |        ^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `veto-swig-gate` (bin "operator_server") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.26s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 4 warnings
+warning: function `send_failure` is never used
+   --> src/bin/../demo/payment.rs:128:8
+    |
+128 | pub fn send_failure(rpc: &RpcClient, payer: &Keypair, instructions: Vec<Instruction>) -> Result<String> {
+    |        ^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `deployment_snapshot` is never used
+   --> src/bin/../demo/payment.rs:193:8
+    |
+193 | pub fn deployment_snapshot(rpc: &RpcClient, program: &Pubkey) -> Result<(u64, String)> {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: `veto-swig-gate` (bin "payment_flow") generated 2 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_heap_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_heap_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `client`
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `solana`
+  --> src/lib.rs:23:1
+   |
+23 | entrypoint!(process_instruction);
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: expected values for `target_os` are: `aix`, `amdhsa`, `android`, `cuda`, `cygwin`, `dragonfly`, `emscripten`, `espidf`, `freebsd`, `fuchsia`, `haiku`, `hermit`, `horizon`, `hurd`, `illumos`, `ios`, `l4re`, `linux`, `lynxos178`, `macos`, `managarm`, `netbsd`, `none`, `nto`, `nuttx`, `openbsd`, `psp`, `psx`, `redox`, `rtems`, `solaris`, `solid_asp3`, `teeos`, `trusty`, and `tvos` and 11 more
+   = note: using a cfg inside a macro will use the cfgs from the destination crate and not the ones from the defining crate
+   = help: try referring to `$crate::custom_panic_default` crate for guidance on how handle this unexpected cfg
+   = help: the macro `$crate::custom_panic_default` may come from an old version of the `solana_program_entrypoint` crate, try updating your dependency with `cargo update -p solana_program_entrypoint`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the macro `entrypoint` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: `veto-swig-gate` (lib) generated 4 warnings
+warning: function `trim_trailing_zeros` is never used
+   --> src/bin/../demo/payment.rs:171:4
+    |
+171 | fn trim_trailing_zeros(bytes: &[u8]) -> &[u8] {
+    |    ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `hex` is never used
+   --> src/bin/../demo/payment.rs:176:4
+    |
+176 | fn hex(bytes: &[u8]) -> String {
+    |    ^^^
+
+warning: function `deployed_code_hash` is never used
+   --> src/bin/../demo/payment.rs:182:8
+    |
+182 | pub fn deployed_code_hash(rpc: &RpcClient, program: &Pubkey) -> Result<String> {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `deployment_snapshot` is never used
+   --> src/bin/../demo/payment.rs:193:8
+    |
+193 | pub fn deployment_snapshot(rpc: &RpcClient, program: &Pubkey) -> Result<(u64, String)> {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: function `file_code_hash` is never used
+   --> src/bin/../demo/payment.rs:208:8
+    |
+208 | pub fn file_code_hash(path: &str) -> Result<String> {
+    |        ^^^^^^^^^^^^^^
+
+warning: function `pay_ix` is never used
+   --> src/bin/../demo/payment.rs:281:8
+    |
+281 | pub fn pay_ix(pay: Pubkey, source: Pubkey, merchant: Pubkey, wallet: Pubkey, amount: u64) -> Instruction {
+    |        ^^^^^^
+
+warning: methods `payment` and `approved_slot` are never used
+   --> src/bin/../demo/payment.rs:396:12
+    |
+376 | impl Guarded {
+    | ------------ methods in this implementation
+...
+396 |     pub fn payment(&self, agent: Pubkey, inner: Instruction) -> Result<Vec<Instruction>> {
+    |            ^^^^^^^
+...
+498 |     pub fn approved_slot(&self, rpc: &RpcClient) -> Result<Option<u64>> {
+    |            ^^^^^^^^^^^^^
+
+warning: `veto-swig-gate` (bin "route_flow") generated 7 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+edc33fcf713d23b12953fcaa771d2b9e4e57a6627d6094c806d6e29eb272520d  adapter/target/deploy/veto_swig_gate.so
+879c34f5f8339f2920fb138722fb0c822a9c9e9d8a394cf58897f7777e64ab25  adapter/fixtures/relay/target/deploy/veto_relay.so
+cbd6c601a5a0258e8727570a868b5dc5875100b8fb4a648b9438817e150115bd  adapter/fixtures/target-program/target/deploy/veto_demo_target.so
+2e24eacb08085de943d79f474b447b0467e2465e464ab995f884fda4be06c8c3  adapter/fixtures/merchant-pay/target/deploy/merchant_pay_v1.so
+fdd97c529134a75029f3d172b036fbae710f370a28c126f0b99b4ffea40b3103  adapter/fixtures/merchant-pay/target/deploy/merchant_pay_v2.so
+b2295bd674078bff8cd035506acc7ea0ae5ead113b2c3699b0319d7aacdd674b  adapter/fixtures/payment-router/target/deploy/veto_payment_router.so
+be63d36227fde018e82a8ffea4f1f29e8ef7cae1e0953d63ff286d94835cc7f6  adapter/fixtures/sneaky-cpi/target/deploy/veto_sneaky_cpi.so
+Wrote new keypair to /tmp/veto-demo.n2S6R3/human.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/agent.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/operator.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/gate.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/target.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/protocol.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/pay.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/router.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/sneaky.json
+Wrote new keypair to /tmp/veto-demo.n2S6R3/relay.json
+Swig source: official devnet program swigypWHEksbC64pWKwah1WTeh9JXwx8H1rJHLdbQMB (cloned)
+merchant-pay v1 slot=0 code-sha256=58af9975522be8bbe8e70fba6e2c300d7c76334b23078d066c0339fe5cfa6810
+setup budget=500.00 plain-wallet=2FnMPLhgU6fP2bG2FMbC5MTftf31NLEkGVoc5g9h97NE veto-wallet=G31RCCstqJJeNoe6u5qFXbPYX4UaocUDpJf4wCYtrTuE policy=FEiJTWJWhT4s3gyJ4YBS5988NpSgkemZ9cFQPyX4R7oy
+v1-payments plain=490.00 veto=490.00 merchant=20.00
+veto-payment-signature=4puwsyDFknX1QwUkV3fs9TE5a3ezkNFZ2NdEWy7DFS7pjtWbyvYcXPjDpDTaXLW7oUFdzHW7e7y2vfjR39pAW41Z
+upgraded program-id=AjJaUbbYgzaSn6SAMWM3QrgDajPdiW6GuaSwMPKiLbXk slot=0->18 code-sha256=1d97c456797e6f0394767cd7d044a6fd4621289d8602a71637c5d972c87ce8c2 matches-reviewed-build=false
+plain-allowlist requested=10.00 charged=490.00
+rejected ix=0 program=6KMKTwqyB23FE8TsBfGdDiTLJyXnaUrT7SAcF2vDDnTA custom=4
+veto-blocked custom=4 charged=0.00 signature=U6c3JyHXNnELm5cnQtJZrCNf7nEcfBR8gvsTRsgLke5xx4Q7mu4zMpUALDFxkmzcdnRcsUrbXBMCto28wcX7m1Z
+after-v2 plain=0.00 veto=490.00 merchant=510.00
+redeployed slot=27 code-sha256=58af9975522be8bbe8e70fba6e2c300d7c76334b23078d066c0339fe5cfa6810 matches-reviewed-build=true
+rejected ix=0 program=6KMKTwqyB23FE8TsBfGdDiTLJyXnaUrT7SAcF2vDDnTA custom=4
+veto-still-blocked-until-review custom=4
+rejected ix=0 program=6KMKTwqyB23FE8TsBfGdDiTLJyXnaUrT7SAcF2vDDnTA custom=2
+agent-reapproval-rejected custom=2 operator-reapproved slot=27
+resumed plain=0.00 veto=480.00 merchant=520.00
+payment-flow-passed
+Veto payment demo passed. Evidence: /Users/femi/Documents/IdeaCenter/spikes/veto/verification-logs/runs/payment-demo-run.log
