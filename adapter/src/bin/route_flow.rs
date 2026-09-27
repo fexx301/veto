@@ -184,6 +184,21 @@ fn main() -> Result<()> {
     send_expected_failure(&rpc, &agent, vec![guarded.approve_program_ix(agent.pubkey(), merchant_pay, pay_slot)], 2)?;
     send(&rpc, &setup, &[&operator], vec![guarded.approve_program_ix(operator.pubkey(), merchant_pay, pay_slot)])?;
     println!("agent-approval-rejected custom=2 operator-approved merchant-pay slot={pay_slot}");
+    // The wallet program and the gate itself can never be approved as route
+    // programs, nor appear in a delegated call.
+    for reserved in [swig_interface::program_id(), gate] {
+        send_expected_failure_signed(
+            &rpc,
+            &setup,
+            &[&operator],
+            vec![guarded.approve_program_ix(operator.pubkey(), reserved, programdata_and_slot(&rpc, &reserved)?.1)],
+            23,
+        )?;
+    }
+    let mut reentrant = inner();
+    reentrant.accounts.push(AccountMeta::new_readonly(swig_interface::program_id(), false));
+    send_expected_failure(&rpc, &agent, guarded.payment_via(agent.pubkey(), reentrant, &[merchant_pay])?, 23)?;
+    println!("reserved-programs-rejected custom=23 (approve wallet program, approve gate, wallet program in route)");
     // Veto must see the downstream program's ProgramData to check it.
     send_expected_failure(&rpc, &agent, guarded.payment_via(agent.pubkey(), inner(), &[])?, 18)?;
     println!("missing-downstream-programdata-rejected custom=18");

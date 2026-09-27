@@ -4,12 +4,12 @@ use {
     solana_commitment_config::CommitmentConfig,
     solana_loader_v3_interface::{get_program_data_address, state::UpgradeableLoaderState},
     solana_sdk::{
-        instruction::{AccountMeta, Instruction},
+        instruction::{AccountMeta, Instruction, InstructionError},
         message::Message,
         pubkey::Pubkey,
         signature::{read_keypair_file, Keypair, Signature},
         signer::Signer,
-        transaction::Transaction,
+        transaction::{Transaction, TransactionError},
     },
     solana_system_interface::instruction as system_instruction,
     std::{env, process::Command, thread::sleep, time::Duration},
@@ -84,8 +84,15 @@ fn send_expected_failure(
                 .err()
                 .ok_or_else(|| anyhow!("transaction unexpectedly succeeded"))?;
             let debug = format!("{error:?}");
-            if !debug.contains(&format!("Custom({expected_custom})")) {
+            // Swig's low error numbers overlap with the gate's (1-23), so match
+            // structurally and require the right program: gate codes from a
+            // non-Swig instruction, Swig codes (3000+) from Swig.
+            let TransactionError::InstructionError(index, InstructionError::Custom(code)) = error else {
                 bail!("expected Custom({expected_custom}), got {debug}");
+            };
+            let from_swig = instructions.get(index as usize).map(|ix| ix.program_id) == Some(swig_program_id());
+            if code != expected_custom || from_swig != (expected_custom >= 1000) {
+                bail!("expected Custom({expected_custom}) from the right program, got {debug}");
             }
             return Ok(());
         }
@@ -563,7 +570,29 @@ fn main() -> Result<()> {
     if counter(&rpc, &counter_key.pubkey())? != 0 {
         bail!("substituted policy executed the target")
     }
-    println!("policy-substitution-rejected error={substituted_policy_attempt} counter=0");
+    // That attempt names the substitute in both the proof data and account
+    // 2, so Swig's role prefix refuses it (Custom(3035)) before Veto's own
+    // check matters. Keep the prefix that Swig accepts and substitute only
+    // the policy account: Veto must refuse the mismatch itself.
+    if !substituted_policy_attempt.contains("InstructionError(1, Custom(3035))") {
+        bail!("expected Swig to refuse the substituted role prefix, got {substituted_policy_attempt}")
+    }
+    let mut mixed_policy = gated_sign(
+        gate,
+        swig,
+        wallet,
+        agent.pubkey(),
+        policy.pubkey(),
+        target,
+        programdata,
+        counter_key.pubkey(),
+    )?;
+    mixed_policy[0].accounts[2].pubkey = substitute_policy.pubkey();
+    send_expected_failure(&rpc, &agent, mixed_policy, 11)?;
+    if counter(&rpc, &counter_key.pubkey())? != 0 {
+        bail!("policy account substitution executed the target")
+    }
+    println!("policy-substitution-rejected swig=Custom(3035) policy-account-only=Custom(11) counter=0");
 
     // The agent cannot replace the human signature to update the approved slot.
     send_expected_failure(

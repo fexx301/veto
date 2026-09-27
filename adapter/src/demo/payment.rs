@@ -9,12 +9,12 @@ use {
     solana_loader_v3_interface::{get_program_data_address, state::UpgradeableLoaderState},
     solana_sdk::{
         hash::hash,
-        instruction::{AccountMeta, Instruction},
+        instruction::{AccountMeta, Instruction, InstructionError},
         message::Message,
         pubkey::Pubkey,
         signature::{Keypair, Signature},
         signer::Signer,
-        transaction::Transaction,
+        transaction::{Transaction, TransactionError},
     },
     solana_system_interface::instruction as system_instruction,
     std::{fs, process::Command, thread::sleep, time::Duration},
@@ -68,9 +68,22 @@ pub fn send_expected_failure(
     instructions: Vec<Instruction>,
     expected_custom: u32,
 ) -> Result<(Signature, String)> {
+    send_expected_failure_signed(rpc, payer, &[], instructions, expected_custom)
+}
+
+/// As `send_expected_failure`, with extra signers besides the fee payer.
+pub fn send_expected_failure_signed(
+    rpc: &RpcClient,
+    payer: &Keypair,
+    signers: &[&Keypair],
+    instructions: Vec<Instruction>,
+    expected_custom: u32,
+) -> Result<(Signature, String)> {
     let blockhash = rpc.get_latest_blockhash()?;
+    let mut all_signers = vec![payer];
+    all_signers.extend_from_slice(signers);
     let tx = Transaction::new(
-        &[payer],
+        &all_signers,
         Message::new(&instructions, Some(&payer.pubkey())),
         blockhash,
     );
@@ -87,9 +100,22 @@ pub fn send_expected_failure(
                 .err()
                 .ok_or_else(|| anyhow!("transaction unexpectedly succeeded"))?;
             let debug = format!("{error:?}");
-            if !debug.contains(&format!("Custom({expected_custom})")) {
+            // Match structurally and name the failing program: Swig's low
+            // error numbers overlap with the gate's, so a bare code match
+            // could credit Veto with a rejection Swig made.
+            let TransactionError::InstructionError(index, InstructionError::Custom(code)) = error else {
                 bail!("expected Custom({expected_custom}), got {debug}");
+            };
+            let program = instructions
+                .get(index as usize)
+                .map(|instruction| instruction.program_id)
+                .ok_or_else(|| anyhow!("failing instruction {index} is out of range"))?;
+            // Gate codes (1-23) from a non-Swig instruction; Swig codes (3000+)
+            // from Swig.
+            if code != expected_custom || (program == swig_program_id()) != (expected_custom >= 1000) {
+                bail!("expected Custom({expected_custom}) from the right program, got {debug} from {program}");
             }
+            println!("rejected ix={index} program={program} custom={code}");
             return Ok((signature, debug));
         }
         sleep(Duration::from_millis(250));
