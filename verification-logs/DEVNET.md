@@ -64,3 +64,5 @@ The downstream route demo (`--route`) has run locally and against the official S
 ## Gate upgrade and separate upgrade key — 2026-09-27
 
 The route-pinning gate [`4okceHnZ…ShJq`](https://explorer.solana.com/address/4okceHnZABKcqadXLK57mkU87c4GAUKNsunr5LHHShJq?cluster=devnet) was upgraded in place with the third-review fixes (slot 504576092; deployed bytes match the local build `a69858af…1297`). Its upgrade authority moved from the deployer key, which the hosted server holds, to a separate key kept off the server: `H21vqhFxy3WR8nMm6MpyRcBxgCBy6hjn2ESvgB7mKaB8`. The gate is still not finalized.
+
+Hosted console redeployed the same day with the third-review server fixes (HSTS and CSP headers confirmed live). Full demo-operator run through https://veto-demo.duckdns.org against the upgraded gate: both wallets 500 → 490; protocol ships v2; plain wallet charged 490 (→ 0.00) while Veto blocked (490 kept); reviewed build redeployed; approved; Veto 490 → 480. Naming the server's own key as operator was refused ("choose the demo operator instead of entering the server's own address").
