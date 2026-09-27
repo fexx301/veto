@@ -314,3 +314,14 @@ Local suite on the changed gate (exit 0 each): regression `complete-flow-passed`
 Devnet: the gate `4okceHnZ…ShJq` was upgraded in place at slot 504576092; its deployed bytes match this build. The deploy script also redeployed merchant-pay v1.
 
 Not changed: the review's remaining findings concern upstream Swig code, which Veto neither vendors nor modifies. Veto trusts the Swig program to enforce `ProgramExec` and does not constrain a wallet root; both are stated in the authority map.
+
+## Fourth review (BountyForge) — 2026-09-27
+
+A broader static review of the old checkout (`0a26062`, before the third-review fixes). Veto-relevant results:
+
+- **Fixed:** rejected requests no longer refresh a hosted run's idle timer, and runs are capped at 15 minutes (F-08); the wallet program and the gate can never be a delegated call's target or route (`RESERVED_PROGRAM`, 23; F-29); the later-Swig-instruction scan covers the full u16 index range; negative tests now match the instruction error structurally and check which program rejected it, and a new case exercises `POLICY_ROLE_MISMATCH` (11), which the old substitution case never reached (it was refused by Swig's role prefix, `Custom(3035)`); trust-section copy names the demo operator (F-11); `deploy-devnet.sh` no longer redeploys merchant-pay on every run.
+- **Already fixed before this review:** gate upgrade key off the hosted server (F-02), pinned merchant-pay hashes (F-26), CI covers the adapter (F-25), source link in the console footer and `LICENSE`/licence field (F-05), setup key refused as operator (F-07).
+- **Not changed, with reasons in `adapter/AUTHORITY-MAP.md`:** code hash in the policy and same-slot redeploy (F-09, F-10 — the loader refuses a second upgrade in one slot, so a slot identifies code), pinning Swig's slot (F-04), authentication on the open demo (F-03), public status fields (F-31).
+- **Not applicable to this repository:** findings about the old Swig checkout's files (root README, `audits/`, `SECURITY.md`, `program/build.rs`, lockfiles, `.DS_Store`). Findings in upstream Swig code are handled privately with the Swig maintainers.
+
+Local suite (exit 0 each, six modes): logs `2026-09-27-bf-*.log`; the route flow prints `reserved-programs-rejected custom=23`, the regression prints `policy-account-only=Custom(11)`. Gate SBF v3 SHA-256 (macOS build) `edc33fcf…520d`; devnet gate upgraded in place at slot 504796288, deployed bytes match. Hosted redeploy and full live run through the public URL: `2026-09-27-hosted-live-run.log` (an invalid action is refused without refreshing the run; plain wallet 500 → 0.00, Veto 490 kept, then 480).

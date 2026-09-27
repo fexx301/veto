@@ -1,0 +1,21 @@
+# Hosted live run 2026-09-27T13:26:38Z against https://veto-demo.duckdns.org, commit 547bb51
+content-security-policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'
+strict-transport-security: max-age=31536000
+== invalid action before a run
+start a run first
+== run (demo operator)
+{"phase": "ready", "balances": {"merchant": "0.00", "plain": "500.00", "veto": "500.00"}, "approvedSlot": 504796340, "currentSlot": 504796340, "codeMatchesReviewed": true, "latest": "Veto policy 93YRWLJbhfWv4q1kYgkDAAaX3KDEj3iT7SSKUtgnSZgM approves merchant-pay at slot 504796340."}
+== invalid action (must not refresh the run)
+action bogus is not valid at phase ready
+== execute
+{"phase": "executed", "balances": {"merchant": "20.00", "plain": "490.00", "veto": "490.00"}, "approvedSlot": 504796340, "currentSlot": 504796340, "codeMatchesReviewed": true, "latest": "The agent paid 10.00 from each wallet. Veto wallet 500.00 \u2192 490.00. Signature: 3DTaMfQZETyV8ePnRXZ3a83tZZtxvXiar2JzwVvvuukPeJhDdCrYhLBtHJB25Tc6uWWB9vzLwj8qTwuziCT6mU3H. Plain allowlist signature: 5U2mU3wseXESz7ufPQUco3UJPjSx1aYtPbQzSn5tMr7c63qxEvh9PpYc2g48Hgrp6V8t2j4Xj32VDL3ot4mkHRSL."}
+== upgrade
+{"phase": "upgraded", "balances": {"merchant": "20.00", "plain": "490.00", "veto": "490.00"}, "approvedSlot": 504796340, "currentSlot": 504796937, "codeMatchesReviewed": false, "latest": "The protocol's upgrade key replaced merchant-pay under the same program ID. Slot 504796340 \u2192 504796937. The deployed code no longer matches the reviewed build. Signature: 414GRQJ5WYpPf2XWdNVPrgUic9CAHX6FjBxWmxXNhcujo3pguKJo7H3dcuL3azKFDiN2mH31YPLnCfv94XJ5W97g."}
+== probe
+{"phase": "blocked", "balances": {"merchant": "510.00", "plain": "0.00", "veto": "490.00"}, "approvedSlot": 504796340, "currentSlot": 504796937, "codeMatchesReviewed": false, "latest": "The agent asked for 10.00 from each wallet. Plain allowlist was charged 490.00. Veto rejected the call (InstructionError(0, Custom(4))), balance unchanged at 490.00. Signature: 41cN37xN8FX1vqQMU8LSm9xh87EchCntkKKVMfyFTzoJE9gqYU5pjyN1XoHgH6ppzDijnQsWHkxxSFFrraHtygyj. Plain allowlist signature: 5GELojqyPPFmrsRB9yCFtGgEHKqYr8gU845B1Le5vnrufMxeeDT63m93bGi9aTEuM6s7D27pPUCQ1FUHchV2bVD7."}
+== fix
+{"phase": "fixed", "balances": {"merchant": "510.00", "plain": "0.00", "veto": "490.00"}, "approvedSlot": 504796340, "currentSlot": 504797061, "codeMatchesReviewed": true, "latest": "Slot 504796937 \u2192 504797061. The deployed code matches the reviewed build again, but Veto keeps the payment paused until the operator approves this deployment. Signature: 2agXLSMFpdB8rTpEwm7FYhP9Z7vvd5C9536fYBNRA28q7bwQxc1zouia7RMvuvELnKUvgE5m2vy8LpaPMg9ErviC."}
+== reapprove
+{"phase": "reapproved", "balances": {"merchant": "510.00", "plain": "0.00", "veto": "490.00"}, "approvedSlot": 504797061, "currentSlot": 504797061, "codeMatchesReviewed": true, "latest": "Operator approved merchant-pay at slot 504797061. Signature: QisGxxhfS2HFrp7Tn1d988cQdAx5Kje3UjhazAopnAcknANUVjmrqEB2FJRTv8b4MC7u37eMohw7hCRW7MnM6yo."}
+== resume
+{"phase": "resumed", "balances": {"merchant": "520.00", "plain": "0.00", "veto": "480.00"}, "approvedSlot": 504797061, "currentSlot": 504797061, "codeMatchesReviewed": true, "latest": "The agent paid 10.00 under the approved deployment. Veto wallet 490.00 \u2192 480.00. Signature: jpynUAzjpjcCkv2z1G35Np8JVvTE733S8uXoWzwALmWQBop5zzbdDYiM4twCV9aY5sfFAqo1edmjC4ozzwj2SFK."}
