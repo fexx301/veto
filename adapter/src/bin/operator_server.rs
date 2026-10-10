@@ -62,6 +62,8 @@ const REQUEST_DEADLINE: Duration = Duration::from_secs(10);
 const MAX_CONNECTIONS: usize = 64;
 /// Hosted runs one client address may start per hour, within the global limit.
 const MAX_RUNS_PER_CLIENT_PER_HOUR: usize = 4;
+/// Largest serialized transaction a Solana packet carries.
+const MAX_TRANSACTION_BYTES: usize = 1232;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Phase {
@@ -95,6 +97,8 @@ struct PendingApproval {
     transaction: Transaction,
     reviewed_slot: u64,
     initializes_policy: bool,
+    /// For a batched approval, every pin it writes, each checked after landing.
+    batch: Option<Vec<Pin>>,
 }
 
 /// Configuration and keys shared by every run.
@@ -276,11 +280,78 @@ impl Shared {
     /// the operator reviewed. Every approval path goes through this, so the
     /// console never prepares or signs an approval for unreviewed code.
     fn reviewed_slot(&self) -> Result<u64> {
-        let (slot, hash) = deployment_snapshot(&self.rpc, &self.target)?;
-        if hash != self.reviewed_hash {
-            bail!("the deployed code does not match the reviewed build; this console will not approve it")
+        self.reviewed_slot_of(&self.target, Some(&self.reviewed_hash))
+    }
+
+    /// As `reviewed_slot`, for any pinned program and the code reviewed for
+    /// it. A program with no reviewed code is never approved.
+    fn reviewed_slot_of(&self, program: &Pubkey, reviewed_hash: Option<&str>) -> Result<u64> {
+        let (slot, hash) = deployment_snapshot(&self.rpc, program)?;
+        if reviewed_hash != Some(hash.as_str()) {
+            if *program == self.target {
+                bail!("the deployed code does not match the reviewed build; this console will not approve it")
+            }
+            bail!(
+                "the deployed code of {} does not match the reviewed build; this console will not approve it",
+                self.program_name(program)
+            )
         }
         Ok(slot)
+    }
+
+    /// The pins one batched approval writes: every program the watcher sees
+    /// changed, at a slot read from the same snapshot as its reviewed-hash
+    /// check. Refuses the whole batch if any changed program is unreviewed.
+    fn batch_pins(&self, run: &Run) -> Result<Vec<Pin>> {
+        if run.phase == Phase::AwaitingApproval {
+            bail!("approve the run's setup before approving changed programs")
+        }
+        let pins = self
+            .watch(run)?
+            .into_iter()
+            .filter(Watched::changed)
+            .map(|watched| {
+                let slot = self.reviewed_slot_of(&watched.pin.program, watched.reviewed_hash.as_deref())?;
+                Ok(Pin { slot, ..watched.pin })
+            })
+            .collect::<Result<Vec<_>>>()?;
+        if pins.is_empty() {
+            bail!("no pinned program has changed since approval")
+        }
+        Ok(pins)
+    }
+
+    /// Confirms a landed batched approval pinned every reviewed slot, then
+    /// records it on the run.
+    fn record_batch(&self, run: &mut Run, pins: &[Pin], signature: &Signature) -> Result<()> {
+        let written = run
+            .guarded
+            .pins(&self.rpc)?
+            .ok_or_else(|| anyhow!("the Veto policy is not initialized"))?;
+        for pin in pins {
+            if !written.iter().any(|w| w.program == pin.program && w.slot == pin.slot) {
+                bail!(
+                    "operator approval did not pin the reviewed deployment of {}",
+                    self.program_name(&pin.program)
+                )
+            }
+        }
+        if run.phase == Phase::Fixed && pins.iter().any(|pin| pin.is_target) {
+            run.phase = Phase::Reapproved;
+        }
+        let approved: Vec<String> = pins
+            .iter()
+            .map(|pin| format!("{} at slot {}", self.program_name(&pin.program), pin.slot))
+            .collect();
+        run.latest = json!({
+            "label": "Changed programs approved",
+            "tone": "success",
+            "detail": format!(
+                "Operator {} approved {} in one transaction. Signature: {}.",
+                run.operator, approved.join(", "), signature
+            )
+        });
+        Ok(())
     }
 
     fn upgrade_to(&self, so: &str) -> Result<(u64, u64, String)> {
@@ -686,6 +757,7 @@ impl DemoState {
             transaction,
             reviewed_slot,
             initializes_policy,
+            batch: None,
         });
         Ok(json!({
             "transaction": encoded,
@@ -695,6 +767,47 @@ impl DemoState {
             "policy": run.policy.pubkey().to_string(),
             "reviewedSlot": reviewed_slot,
             "kind": if initializes_policy { "initialize" } else { "reapprove" }
+        }))
+    }
+
+    /// One transaction re-pinning every changed program, for the operator's
+    /// wallet to sign once. Submitted through `submit_operator_approval`.
+    fn prepare_batch_approval(&mut self, caller: Option<&str>) -> Result<Value> {
+        self.owned_run(caller)?;
+        let shared = &self.shared;
+        let run = self.run.as_mut().ok_or_else(|| anyhow!("start a run first"))?;
+        if run.operator == shared.setup.pubkey() {
+            bail!("the demo operator approves changed programs through the console action")
+        }
+        let pins = shared.batch_pins(run)?;
+        let instructions = run
+            .guarded
+            .batch_approval_ixs(run.operator, shared.agent.pubkey(), &pins)?;
+        let blockhash = shared.rpc.get_latest_blockhash()?;
+        let mut transaction =
+            Transaction::new_unsigned(Message::new(&instructions, Some(&shared.setup.pubkey())));
+        transaction.try_partial_sign(&[&shared.setup], blockhash)?;
+        let serialized = bincode::serialize(&transaction)?;
+        if serialized.len() > MAX_TRANSACTION_BYTES {
+            bail!("approving {} programs at once does not fit in one transaction", pins.len())
+        }
+        let programs: Vec<Value> = pins
+            .iter()
+            .map(|pin| json!({ "program": pin.program.to_string(), "reviewedSlot": pin.slot }))
+            .collect();
+        run.pending_approval = Some(PendingApproval {
+            transaction,
+            reviewed_slot: 0,
+            initializes_policy: false,
+            batch: Some(pins),
+        });
+        Ok(json!({
+            "transaction": BASE64.encode(serialized),
+            "operator": run.operator.to_string(),
+            "gate": shared.gate.to_string(),
+            "policy": run.policy.pubkey().to_string(),
+            "programs": programs,
+            "kind": "batch"
         }))
     }
 
@@ -739,6 +852,11 @@ impl DemoState {
             .verify()
             .context("operator transaction is missing a valid authority signature")?;
         let signature = shared.rpc.send_and_confirm_transaction(&transaction)?;
+        if let Some(pins) = &pending.batch {
+            shared.record_batch(run, pins, &signature)?;
+            run.pending_approval = None;
+            return self.status(caller);
+        }
         if run.guarded.approved_slot(&shared.rpc)? != Some(pending.reviewed_slot) {
             bail!("operator approval did not pin the reviewed deployment slot")
         }
@@ -872,6 +990,17 @@ impl DemoState {
                 });
             },
             ("reapprove", Phase::Fixed) => bail!("external operator signature required"),
+            ("approve-all", _) if run.operator == shared.setup.pubkey() => {
+                let pins = shared.batch_pins(run)?;
+                let signature = send(
+                    rpc,
+                    &shared.setup,
+                    &[],
+                    run.guarded.batch_approval_ixs(run.operator, agent.pubkey(), &pins)?,
+                )?;
+                shared.record_batch(run, &pins, &signature)?;
+            },
+            ("approve-all", _) => bail!("external operator signature required"),
             ("resume", Phase::Reapproved) => {
                 let (veto_before, _) = balances(run)?;
                 let signature = send(rpc, agent, &[], guarded_pay(run)?)?;
@@ -1248,6 +1377,17 @@ fn handle(
                 return json_response(&mut stream, Err(busy()), "");
             };
             let result = guard.prepare_operator_approval(caller);
+            if result.is_ok() {
+                guard.touch(caller);
+            }
+            drop(guard);
+            json_response(&mut stream, result, "")
+        },
+        ("POST", "/api/operator/batch-approval-transaction") => {
+            let Some(mut guard) = lock() else {
+                return json_response(&mut stream, Err(busy()), "");
+            };
+            let result = guard.prepare_batch_approval(caller);
             if result.is_ok() {
                 guard.touch(caller);
             }
