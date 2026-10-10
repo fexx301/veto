@@ -2,7 +2,8 @@
 //! forwards payments to `merchant-pay`. Only the downstream merchant-pay is
 //! upgraded. A plain program allowlist on the router keeps paying; Veto checks
 //! every program the delegated call can reach and stops until the operator
-//! approves the new merchant-pay deployment.
+//! approves the new merchant-pay deployment. Finally both programs are
+//! redeployed and the operator re-approves them in one batched transaction.
 
 #[path = "../demo/payment.rs"]
 mod payment;
@@ -83,6 +84,8 @@ fn main() -> Result<()> {
     let pay_keypair = env::var("PAY_KEYPAIR").context("missing PAY_KEYPAIR")?;
     let pay_v1 = env::var("PAY_V1_SO").context("missing PAY_V1_SO")?;
     let pay_v2 = env::var("PAY_V2_SO").context("missing PAY_V2_SO")?;
+    let router_keypair = env::var("ROUTER_KEYPAIR").context("missing ROUTER_KEYPAIR")?;
+    let router_so = env::var("ROUTER_SO").context("missing ROUTER_SO")?;
     let upgrade = |so: &str| deploy(&solana_bin, &rpc_url, &protocol_path, &pay_keypair, so);
 
     let operator = Keypair::new();
@@ -261,6 +264,40 @@ fn main() -> Result<()> {
         bail!("resumed payment did not charge exactly the requested amount")
     }
     report("resumed")?;
+
+    // 6. Both the router (target) and merchant-pay (route) are redeployed with
+    //    their reviewed builds. One transaction, signed once by the operator,
+    //    re-pins both deployments; payments resume.
+    deploy(&solana_bin, &rpc_url, &human_path, &router_keypair, &router_so)?;
+    upgrade(&pay_v1)?;
+    let (_, router_new) = programdata_and_slot(&rpc, &router)?;
+    let (_, pay_new) = programdata_and_slot(&rpc, &merchant_pay)?;
+    if router_new == router_slot || pay_new == fixed_slot {
+        bail!("expected the loader to redeploy both the router and merchant-pay")
+    }
+    wait_past_slot(&rpc, router_new.max(pay_new))?;
+    send_expected_failure(&rpc, &agent, guarded_pay()?, 4)?;
+    println!(
+        "both-redeployed router slot={router_slot}->{router_new} merchant-pay slot={fixed_slot}->{pay_new} veto-blocked custom=4"
+    );
+    let pins = [
+        Pin { program: router, slot: router_new, is_target: true },
+        Pin { program: merchant_pay, slot: pay_new, is_target: false },
+    ];
+    // Only the policy authority can sign the batch.
+    send_expected_failure(&rpc, &agent, guarded.batch_approval_ixs(agent.pubkey(), agent.pubkey(), &pins)?, 2)?;
+    let batch = guarded.batch_approval_ixs(operator.pubkey(), agent.pubkey(), &pins)?;
+    let signature = send(&rpc, &setup, &[&operator], batch)?;
+    let written = guarded.pins(&rpc)?.ok_or_else(|| anyhow!("the Veto policy is not initialized"))?;
+    if pins.iter().any(|pin| !written.contains(pin)) {
+        bail!("the batched approval did not pin both deployments")
+    }
+    println!("agent-batch-rejected custom=2 batched-reapproval programs=2 operator-signatures=1 signature={signature}");
+    send(&rpc, &agent, &[], guarded_pay()?)?;
+    if balance(&rpc, &guarded_source.pubkey())? != BUDGET - 3 * PAYMENT {
+        bail!("payment after the batched approval did not charge exactly the requested amount")
+    }
+    report("resumed-after-batch")?;
     println!("route-flow-passed");
     Ok(())
 }

@@ -60,6 +60,9 @@ security audit.
 the agent may call a `payment-router` that forwards to `merchant-pay`; only
 merchant-pay is upgraded, so an allowlist of the router alone keeps paying,
 while Veto blocks the call until the operator approves the new deployment.
+It then redeploys both the router and merchant-pay and re-approves the two
+deployments in one transaction the operator signs once, as the console's
+"Review and approve all" does.
 
 ## Payment demo
 

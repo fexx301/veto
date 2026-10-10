@@ -432,6 +432,8 @@ elif [[ "$RUN_MODE" == "--route" ]]; then
   PROTOCOL_PATH="$WORK/protocol.json" \
   GATE_ID="$GATE_ID" \
   ROUTER_ID="$ROUTER_ID" \
+  ROUTER_KEYPAIR="$WORK/router.json" \
+  ROUTER_SO="$ROOT/$ROUTER_SO" \
   SNEAKY_ID="$SNEAKY_ID" \
   PAY_ID="$PAY_ID" \
   PAY_KEYPAIR="$WORK/pay.json" \
