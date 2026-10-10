@@ -144,9 +144,9 @@ struct Run {
     phase: Phase,
     latest: Value,
     pending_approval: Option<PendingApproval>,
-    /// Code hash of each route program at the deployment the operator
-    /// approved at setup. For a route program with no configured reviewed
-    /// build, the approved deployment is the reviewed code.
+    /// Code hash of each route program at the deployment the policy pins,
+    /// recorded whenever the watcher sees it unchanged. For a route program
+    /// with no configured reviewed build, the approved code is the reviewed code.
     reviewed_routes: Vec<(Pubkey, String)>,
 }
 
@@ -156,6 +156,22 @@ struct Watched {
     current_slot: u64,
     current_hash: String,
     reviewed_hash: Option<String>,
+}
+
+impl Run {
+    /// Records the code of each route program still at its approved
+    /// deployment. A deployment slot identifies its code (see
+    /// AUTHORITY-MAP.md), so while the slot equals the pin this is exactly the
+    /// code that was approved, however long after the approval it is read.
+    fn note_approved_code(&mut self, watched: &[Watched]) {
+        for entry in watched.iter().filter(|entry| !entry.pin.is_target && !entry.changed()) {
+            let hash = entry.current_hash.clone();
+            match self.reviewed_routes.iter_mut().find(|(program, _)| *program == entry.pin.program) {
+                Some((_, recorded)) => *recorded = hash,
+                None => self.reviewed_routes.push((entry.pin.program, hash)),
+            }
+        }
+    }
 }
 
 impl Watched {
@@ -484,7 +500,6 @@ impl Shared {
             policy: policy.pubkey(),
             pay: self.target,
         };
-        let mut reviewed_routes = Vec::new();
         let (phase, latest) = if operator == self.setup.pubkey() {
             send(
                 &self.rpc,
@@ -499,7 +514,6 @@ impl Shared {
                     initial_slot,
                 )?,
             )?;
-            reviewed_routes = self.route_baseline(&guarded);
             (
                 Phase::Ready,
                 json!({
@@ -521,7 +535,7 @@ impl Shared {
                 }),
             )
         };
-        Ok(Run {
+        let mut run = Run {
             token: new_token(),
             started: Instant::now(),
             last_activity: Instant::now(),
@@ -535,34 +549,20 @@ impl Shared {
             phase,
             latest,
             pending_approval: None,
-            reviewed_routes,
-        })
+            reviewed_routes: Vec::new(),
+        };
+        self.note_route_code(&mut run);
+        Ok(run)
     }
 
-    /// Hashes of the route programs at the deployments the policy pins. Read
-    /// right after the operator's setup approval; a program already upgraded
-    /// past its pin by then is left out, so the console never approves it.
-    /// The setup has already landed, so a failed read leaves the baseline
-    /// empty (every route unreviewed) rather than failing the step.
-    fn route_baseline(&self, guarded: &Guarded) -> Vec<(Pubkey, String)> {
-        self.read_route_baseline(guarded).unwrap_or_else(|error| {
-            eprintln!("could not record the route baseline: {error:#}");
-            Vec::new()
-        })
-    }
-
-    fn read_route_baseline(&self, guarded: &Guarded) -> Result<Vec<(Pubkey, String)>> {
-        let mut reviewed = Vec::new();
-        for pin in guarded.pins(&self.rpc)?.unwrap_or_default() {
-            if pin.is_target {
-                continue;
-            }
-            let (slot, hash) = deployment_snapshot(&self.rpc, &pin.program)?;
-            if slot == pin.slot {
-                reviewed.push((pin.program, hash));
-            }
+    /// Records the approved code of the run's route programs right after a
+    /// setup approval. Every status read records it again, so a failed read
+    /// here only delays it; it never fails a step that already landed.
+    fn note_route_code(&self, run: &mut Run) {
+        match self.watch(run) {
+            Ok(watched) => run.note_approved_code(&watched),
+            Err(error) => eprintln!("could not record the route programs' approved code: {error:#}"),
         }
-        Ok(reviewed)
     }
 
     /// The reviewed code hash for a pinned program, if the console has one:
@@ -685,7 +685,16 @@ impl DemoState {
         Ok(token)
     }
 
-    fn status(&self, caller: Option<&str>) -> Result<Value> {
+    fn status(&mut self, caller: Option<&str>) -> Result<Value> {
+        // The watcher also records the approved code of unchanged route
+        // programs, so a later change can be compared with it.
+        let watched = self.run.as_mut().map(|run| {
+            let watched = self.shared.watch(run);
+            if let Ok(watched) = &watched {
+                run.note_approved_code(watched);
+            }
+            watched
+        });
         let shared = &self.shared;
         let (current_slot, current_hash) = deployment_snapshot(&shared.rpc, &shared.target)?;
         let mut status = json!({
@@ -733,7 +742,7 @@ impl DemoState {
         });
         // Advisory only: approvals re-read every program, so a failed watch
         // must not take the rest of the console offline.
-        let watched = shared.watch(run).unwrap_or_else(|error| {
+        let watched = watched.unwrap_or_else(|| Ok(Vec::new())).unwrap_or_else(|error| {
             eprintln!("upgrade watcher failed: {error:#}");
             status["watchError"] = json!(true);
             Vec::new()
@@ -925,7 +934,7 @@ impl DemoState {
             bail!("operator approval did not pin the reviewed deployment slot")
         }
         if pending.initializes_policy {
-            run.reviewed_routes = shared.route_baseline(&run.guarded);
+            shared.note_route_code(run);
         }
         run.phase = if pending.initializes_policy {
             Phase::Ready
@@ -1372,7 +1381,7 @@ fn handle(
         ),
         ("GET", "/api/status") => {
             let result = match lock() {
-                Some(guard) => {
+                Some(mut guard) => {
                     let result = guard.status(caller);
                     if let (Ok(status), Ok(mut cache)) = (&result, cached.lock()) {
                         *cache = status.clone();
@@ -1570,7 +1579,12 @@ fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use {
-        super::{forwarded_client, parse_route_builds, payment::*, redact_urls, MAX_TRANSACTION_BYTES},
+        super::{
+            forwarded_client, parse_route_builds, payment::*, redact_urls, Phase, Run, Watched,
+            MAX_TRANSACTION_BYTES,
+        },
+        serde_json::Value,
+        std::time::Instant,
         solana_sdk::{
             hash::Hash, message::Message, pubkey::Pubkey, signature::Keypair, signer::Signer,
             transaction::Transaction,
@@ -1658,6 +1672,52 @@ mod tests {
         assert!(guarded.batch_approval_ixs(operator, agent, &twice).is_err());
         assert!(guarded.batch_approval_ixs(operator, agent, &[pin(target, 1, false)]).is_err());
         assert!(guarded.batch_approval_ixs(operator, agent, &[pin(TOKEN_PROGRAM_ID, 1, true)]).is_err());
+    }
+
+    fn run(target: Pubkey) -> Run {
+        Run {
+            token: String::new(),
+            started: Instant::now(),
+            last_activity: Instant::now(),
+            operator: Pubkey::new_unique(),
+            policy: Keypair::new(),
+            guarded: guarded(target),
+            guarded_source: Pubkey::new_unique(),
+            plain_swig: Pubkey::new_unique(),
+            plain_wallet: Pubkey::new_unique(),
+            plain_source: Pubkey::new_unique(),
+            phase: Phase::Ready,
+            latest: Value::Null,
+            pending_approval: None,
+            reviewed_routes: Vec::new(),
+        }
+    }
+
+    fn watched(pin: Pin, current_slot: u64, current_hash: &str) -> Watched {
+        Watched { pin, current_slot, current_hash: current_hash.to_owned(), reviewed_hash: None }
+    }
+
+    #[test]
+    fn records_route_code_only_while_it_is_the_approved_deployment() {
+        let (target, router) = (Pubkey::new_unique(), Pubkey::new_unique());
+        let mut run = run(target);
+        run.note_approved_code(&[
+            watched(pin(target, 5, true), 5, "target"),
+            watched(pin(TOKEN_PROGRAM_ID, 3, false), 3, "token-v1"),
+            watched(pin(router, 4, false), 9, "router-upgraded"),
+        ]);
+        // The target is reviewed through its build; an upgraded route's new
+        // code is never recorded as approved.
+        assert_eq!(run.reviewed_routes, vec![(TOKEN_PROGRAM_ID, "token-v1".to_owned())]);
+        // After a re-approval pins the new deployment, its code is recorded.
+        run.note_approved_code(&[
+            watched(pin(TOKEN_PROGRAM_ID, 8, false), 8, "token-v2"),
+            watched(pin(router, 9, false), 9, "router-upgraded"),
+        ]);
+        assert_eq!(
+            run.reviewed_routes,
+            vec![(TOKEN_PROGRAM_ID, "token-v2".to_owned()), (router, "router-upgraded".to_owned())]
+        );
     }
 
     #[test]
