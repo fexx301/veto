@@ -119,6 +119,10 @@ struct Shared {
     pay_v1: String,
     pay_v2: String,
     reviewed_hash: String,
+    /// Builds the operator reviewed for route programs, from
+    /// `REVIEWED_ROUTE_BUILDS`. A route program listed here is approved only
+    /// at this code; one not listed only at the code it was last approved at.
+    reviewed_route_builds: Vec<(Pubkey, String)>,
     mint: Pubkey,
     merchant: Pubkey,
 }
@@ -141,8 +145,8 @@ struct Run {
     latest: Value,
     pending_approval: Option<PendingApproval>,
     /// Code hash of each route program at the deployment the operator
-    /// approved at setup. The console has no build of its own to review for
-    /// these, so the approved deployment is the reviewed code.
+    /// approved at setup. For a route program with no configured reviewed
+    /// build, the approved deployment is the reviewed code.
     reviewed_routes: Vec<(Pubkey, String)>,
 }
 
@@ -202,6 +206,34 @@ fn network_label(rpc_url: &str) -> &'static str {
     }
 }
 
+/// Parses `REVIEWED_ROUTE_BUILDS`: comma-separated `PROGRAM_ID=PATH_TO_SO`
+/// entries naming the build the operator reviewed for each route program.
+/// The target is reviewed through `PAY_V1_SO` and cannot be listed here.
+fn parse_route_builds(value: &str, target: &Pubkey) -> Result<Vec<(Pubkey, String)>> {
+    let mut builds: Vec<(Pubkey, String)> = Vec::new();
+    for entry in value.split(',').map(str::trim).filter(|entry| !entry.is_empty()) {
+        let (program, path) = entry
+            .split_once('=')
+            .ok_or_else(|| anyhow!("REVIEWED_ROUTE_BUILDS entry {entry} is not PROGRAM_ID=PATH"))?;
+        let program: Pubkey = program
+            .trim()
+            .parse()
+            .with_context(|| format!("invalid program id in REVIEWED_ROUTE_BUILDS entry {entry}"))?;
+        let path = path.trim();
+        if path.is_empty() {
+            bail!("REVIEWED_ROUTE_BUILDS entry {entry} has no build path")
+        }
+        if program == *target {
+            bail!("REVIEWED_ROUTE_BUILDS cannot list merchant-pay; its reviewed build is PAY_V1_SO")
+        }
+        if builds.iter().any(|(listed, _)| *listed == program) {
+            bail!("REVIEWED_ROUTE_BUILDS lists {program} twice")
+        }
+        builds.push((program, path.to_owned()));
+    }
+    Ok(builds)
+}
+
 /// An unguessable run token: the address of a fresh random keypair.
 fn new_token() -> String {
     Keypair::new().pubkey().to_string()
@@ -239,6 +271,14 @@ impl Shared {
         let agent = required_keypair("AGENT_PATH")?;
         let pay_v1 = required_var("PAY_V1_SO")?;
         let reviewed_hash = file_code_hash(&pay_v1)?;
+        let target = required_pubkey("PAY_ID")?;
+        let reviewed_route_builds = parse_route_builds(
+            &env::var("REVIEWED_ROUTE_BUILDS").unwrap_or_default(),
+            &target,
+        )?
+        .into_iter()
+        .map(|(program, path)| Ok((program, file_code_hash(&path)?)))
+        .collect::<Result<Vec<_>>>()?;
 
         // One test-token mint and merchant account serve every run.
         let mint = Keypair::new();
@@ -266,11 +306,12 @@ impl Shared {
             agent,
             protocol_path: required_var("PROTOCOL_PATH")?,
             gate: required_pubkey("GATE_ID")?,
-            target: required_pubkey("PAY_ID")?,
+            target,
             pay_keypair_path: required_var("PAY_KEYPAIR")?,
             pay_v1,
             pay_v2: required_var("PAY_V2_SO")?,
             reviewed_hash,
+            reviewed_route_builds,
             mint: mint.pubkey(),
             merchant: merchant.pubkey(),
         })
@@ -524,14 +565,22 @@ impl Shared {
         Ok(reviewed)
     }
 
-    /// The reviewed code hash for a pinned program, if the console has one.
+    /// The reviewed code hash for a pinned program, if the console has one:
+    /// the target's reviewed build, a route program's configured reviewed
+    /// build, or else the code it was approved at.
     fn reviewed_hash_for(&self, run: &Run, pin: &Pin) -> Option<String> {
         if pin.is_target {
             return (pin.program == self.target).then(|| self.reviewed_hash.clone());
         }
-        run.reviewed_routes
+        let configured = self
+            .reviewed_route_builds
             .iter()
-            .find_map(|(program, hash)| (*program == pin.program).then(|| hash.clone()))
+            .find_map(|(program, hash)| (*program == pin.program).then(|| hash.clone()));
+        configured.or_else(|| {
+            run.reviewed_routes
+                .iter()
+                .find_map(|(program, hash)| (*program == pin.program).then(|| hash.clone()))
+        })
     }
 
     /// Upgrade watcher: the current deployment of every program the run's
@@ -1521,7 +1570,7 @@ fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use {
-        super::{forwarded_client, payment::*, redact_urls, MAX_TRANSACTION_BYTES},
+        super::{forwarded_client, parse_route_builds, payment::*, redact_urls, MAX_TRANSACTION_BYTES},
         solana_sdk::{
             hash::Hash, message::Message, pubkey::Pubkey, signature::Keypair, signer::Signer,
             transaction::Transaction,
@@ -1609,6 +1658,29 @@ mod tests {
         assert!(guarded.batch_approval_ixs(operator, agent, &twice).is_err());
         assert!(guarded.batch_approval_ixs(operator, agent, &[pin(target, 1, false)]).is_err());
         assert!(guarded.batch_approval_ixs(operator, agent, &[pin(TOKEN_PROGRAM_ID, 1, true)]).is_err());
+    }
+
+    #[test]
+    fn parses_reviewed_route_builds() {
+        let (target, router) = (Pubkey::new_unique(), Pubkey::new_unique());
+        assert_eq!(parse_route_builds("", &target).unwrap(), vec![]);
+        let value = format!(" {TOKEN_PROGRAM_ID}=/builds/spl_token.so , {router}=/builds/router.so,");
+        assert_eq!(
+            parse_route_builds(&value, &target).unwrap(),
+            vec![
+                (TOKEN_PROGRAM_ID, "/builds/spl_token.so".to_owned()),
+                (router, "/builds/router.so".to_owned()),
+            ]
+        );
+        for bad in [
+            format!("{router}"),
+            format!("{router}="),
+            "not-a-key=/builds/x.so".to_owned(),
+            format!("{target}=/builds/merchant_pay.so"),
+            format!("{router}=/a.so,{router}=/b.so"),
+        ] {
+            assert!(parse_route_builds(&bad, &target).is_err(), "accepted {bad}");
+        }
     }
 
     #[test]
