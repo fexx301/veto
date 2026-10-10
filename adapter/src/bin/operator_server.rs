@@ -458,7 +458,7 @@ impl Shared {
                     initial_slot,
                 )?,
             )?;
-            reviewed_routes = self.route_baseline(&guarded)?;
+            reviewed_routes = self.route_baseline(&guarded);
             (
                 Phase::Ready,
                 json!({
@@ -501,7 +501,16 @@ impl Shared {
     /// Hashes of the route programs at the deployments the policy pins. Read
     /// right after the operator's setup approval; a program already upgraded
     /// past its pin by then is left out, so the console never approves it.
-    fn route_baseline(&self, guarded: &Guarded) -> Result<Vec<(Pubkey, String)>> {
+    /// The setup has already landed, so a failed read leaves the baseline
+    /// empty (every route unreviewed) rather than failing the step.
+    fn route_baseline(&self, guarded: &Guarded) -> Vec<(Pubkey, String)> {
+        self.read_route_baseline(guarded).unwrap_or_else(|error| {
+            eprintln!("could not record the route baseline: {error:#}");
+            Vec::new()
+        })
+    }
+
+    fn read_route_baseline(&self, guarded: &Guarded) -> Result<Vec<(Pubkey, String)>> {
         let mut reviewed = Vec::new();
         for pin in guarded.pins(&self.rpc)?.unwrap_or_default() {
             if pin.is_target {
@@ -673,7 +682,13 @@ impl DemoState {
             },
             "latest": &run.latest,
         });
-        let watched = shared.watch(run)?;
+        // Advisory only: approvals re-read every program, so a failed watch
+        // must not take the rest of the console offline.
+        let watched = shared.watch(run).unwrap_or_else(|error| {
+            eprintln!("upgrade watcher failed: {error:#}");
+            status["watchError"] = json!(true);
+            Vec::new()
+        });
         status["pinnedPrograms"] = json!(watched.len());
         status["changedPrograms"] = watched
             .iter()
@@ -861,7 +876,7 @@ impl DemoState {
             bail!("operator approval did not pin the reviewed deployment slot")
         }
         if pending.initializes_policy {
-            run.reviewed_routes = shared.route_baseline(&run.guarded)?;
+            run.reviewed_routes = shared.route_baseline(&run.guarded);
         }
         run.phase = if pending.initializes_policy {
             Phase::Ready
