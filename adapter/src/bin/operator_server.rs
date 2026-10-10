@@ -1505,7 +1505,114 @@ fn main() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{forwarded_client, redact_urls};
+    use {
+        super::{forwarded_client, payment::*, redact_urls, MAX_TRANSACTION_BYTES},
+        solana_sdk::{
+            hash::Hash, message::Message, pubkey::Pubkey, signature::Keypair, signer::Signer,
+            transaction::Transaction,
+        },
+    };
+
+    fn guarded(target: Pubkey) -> Guarded {
+        Guarded {
+            gate: Pubkey::new_unique(),
+            swig: Pubkey::new_unique(),
+            wallet: Pubkey::new_unique(),
+            policy: Pubkey::new_unique(),
+            pay: target,
+        }
+    }
+
+    /// Policy bytes as the gate writes them: target and slot in the header,
+    /// then the route count and (program, slot) entries.
+    fn policy_bytes(target: Pubkey, slot: u64, routes: &[(Pubkey, u64)]) -> Vec<u8> {
+        let mut bytes = vec![0u8; POLICY_LEN];
+        bytes[0] = 1;
+        bytes[33..65].copy_from_slice(target.as_ref());
+        bytes[POLICY_SLOT_START..POLICY_SLOT_START + 8].copy_from_slice(&slot.to_le_bytes());
+        bytes[201] = routes.len() as u8;
+        for (index, (program, slot)) in routes.iter().enumerate() {
+            let start = 202 + index * 40;
+            bytes[start..start + 32].copy_from_slice(program.as_ref());
+            bytes[start + 32..start + 40].copy_from_slice(&slot.to_le_bytes());
+        }
+        bytes
+    }
+
+    fn pin(program: Pubkey, slot: u64, is_target: bool) -> Pin {
+        Pin { program, slot, is_target }
+    }
+
+    #[test]
+    fn reads_every_pinned_program_from_the_policy() {
+        let (target, token, router) = (Pubkey::new_unique(), TOKEN_PROGRAM_ID, Pubkey::new_unique());
+        let pins = policy_pins(&policy_bytes(target, 7, &[(token, 3), (router, 9)])).unwrap();
+        assert_eq!(pins, vec![pin(target, 7, true), pin(token, 3, false), pin(router, 9, false)]);
+        let mut uninitialized = policy_bytes(target, 7, &[]);
+        uninitialized[0] = 0;
+        assert!(policy_pins(&uninitialized).is_err());
+        assert!(policy_pins(&[1u8; 10]).is_err());
+    }
+
+    #[test]
+    fn builds_one_instruction_per_changed_program() {
+        let (target, router) = (Pubkey::new_unique(), Pubkey::new_unique());
+        let (operator, agent) = (Pubkey::new_unique(), Pubkey::new_unique());
+        let guarded = guarded(target);
+        let pins = [pin(target, 41, true), pin(TOKEN_PROGRAM_ID, 42, false), pin(router, 43, false)];
+        let ixs = guarded.batch_approval_ixs(operator, agent, &pins).unwrap();
+        assert_eq!(ixs.len(), 3);
+        assert_eq!(ixs[0], guarded.approval_ix(1, operator, agent, 41));
+        assert_eq!(ixs[1], guarded.approve_program_ix(operator, TOKEN_PROGRAM_ID, 42));
+        assert_eq!(ixs[2], guarded.approve_program_ix(operator, router, 43));
+        for (ix, pin) in ixs.iter().zip(&pins) {
+            assert_eq!(ix.program_id, guarded.gate);
+            assert_eq!(ix.data[0], if pin.is_target { 1 } else { 3 });
+            assert_eq!(ix.data[1..], pin.slot.to_le_bytes());
+            assert_eq!(ix.accounts[0].pubkey, guarded.policy);
+            assert_eq!(ix.accounts[2].pubkey, pin.program);
+            // The operator signs only as the read-only policy authority.
+            let operator_metas: Vec<_> = ix.accounts.iter().enumerate().filter(|(_, m)| m.pubkey == operator).collect();
+            assert_eq!(operator_metas.len(), 1);
+            assert_eq!(operator_metas[0].0, 1);
+            assert!(operator_metas[0].1.is_signer && !operator_metas[0].1.is_writable);
+        }
+        // Signed by the payer and operator only; the operator does not pay.
+        let message = Message::new(&ixs, Some(&Pubkey::new_unique()));
+        assert_eq!(message.header.num_required_signatures, 2);
+        assert_eq!(message.account_keys[1], operator);
+        assert!(!message.is_maybe_writable(1, None));
+    }
+
+    #[test]
+    fn refuses_an_empty_duplicated_or_mislabelled_batch() {
+        let target = Pubkey::new_unique();
+        let (operator, agent) = (Pubkey::new_unique(), Pubkey::new_unique());
+        let guarded = guarded(target);
+        assert!(guarded.batch_approval_ixs(operator, agent, &[]).is_err());
+        let twice = [pin(TOKEN_PROGRAM_ID, 1, false), pin(TOKEN_PROGRAM_ID, 2, false)];
+        assert!(guarded.batch_approval_ixs(operator, agent, &twice).is_err());
+        assert!(guarded.batch_approval_ixs(operator, agent, &[pin(target, 1, false)]).is_err());
+        assert!(guarded.batch_approval_ixs(operator, agent, &[pin(TOKEN_PROGRAM_ID, 1, true)]).is_err());
+    }
+
+    #[test]
+    fn the_largest_batch_fits_in_one_transaction() {
+        // A full policy: the target plus eight route programs, all changed.
+        let target = Pubkey::new_unique();
+        let (payer, operator) = (Keypair::new(), Keypair::new());
+        let guarded = guarded(target);
+        let mut pins = vec![pin(target, u64::MAX, true)];
+        pins.extend((0..8).map(|_| pin(Pubkey::new_unique(), u64::MAX, false)));
+        let ixs = guarded.batch_approval_ixs(operator.pubkey(), Pubkey::new_unique(), &pins).unwrap();
+        let transaction = Transaction::new(
+            &[&payer, &operator],
+            Message::new(&ixs, Some(&payer.pubkey())),
+            Hash::default(),
+        );
+        let size = bincode::serialize(&transaction).unwrap().len();
+        assert!(size <= MAX_TRANSACTION_BYTES, "batch of 9 is {size} bytes");
+    }
 
     #[test]
     fn trusts_forwarded_for_only_from_loopback() {

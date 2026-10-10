@@ -126,10 +126,21 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+// The console's own transaction builders, so the tests check exactly what the
+// operator is asked to sign.
+#[cfg(test)]
+#[allow(dead_code)]
+#[path = "../demo/payment.rs"]
+mod payment;
+
 #[cfg(test)]
 mod tests {
     use {
-        super::{check_approval, SWIG_PROGRAM},
+        super::{
+            check_approval,
+            payment::{Guarded, Pin, TOKEN_PROGRAM_ID},
+            SWIG_PROGRAM,
+        },
         solana_sdk::{
             hash::Hash,
             instruction::{AccountMeta, Instruction},
@@ -200,6 +211,47 @@ mod tests {
         let (operator, payer, gate) = keys();
         let tx = transaction(&[gate_approval(gate, operator, 1)], &payer);
         assert!(check_approval(&tx, &operator, &gate).is_ok());
+    }
+
+    /// The console's batched re-approval: the target and two route programs
+    /// re-pinned in one transaction the server pays for.
+    fn batch(gate: Pubkey, operator: Pubkey) -> Vec<Instruction> {
+        let target = Pubkey::new_unique();
+        let guarded = Guarded {
+            gate,
+            swig: Pubkey::new_unique(),
+            wallet: Pubkey::new_unique(),
+            policy: Pubkey::new_unique(),
+            pay: target,
+        };
+        let pins = [
+            Pin { program: target, slot: 41, is_target: true },
+            Pin { program: TOKEN_PROGRAM_ID, slot: 42, is_target: false },
+            Pin { program: Pubkey::new_unique(), slot: 43, is_target: false },
+        ];
+        guarded.batch_approval_ixs(operator, Pubkey::new_unique(), &pins).unwrap()
+    }
+
+    #[test]
+    fn accepts_a_batched_reapproval() {
+        let (operator, payer, gate) = keys();
+        let ixs = batch(gate, operator);
+        assert_eq!(ixs.iter().map(|ix| ix.data[0]).collect::<Vec<_>>(), [1, 3, 3]);
+        assert!(check_approval(&transaction(&ixs, &payer), &operator, &gate).is_ok());
+    }
+
+    #[test]
+    fn refuses_a_batch_carrying_anything_else() {
+        let (operator, payer, gate) = keys();
+        let mut ixs = batch(gate, operator);
+        ixs.push(system_instruction::transfer(&operator, &Pubkey::new_unique(), 1));
+        assert!(check_approval(&transaction(&ixs, &payer), &operator, &gate).is_err());
+        let ixs = batch(gate, operator);
+        let tx = transaction(&ixs, &operator);
+        assert!(check_approval(&tx, &operator, &gate).unwrap_err().to_string().contains("fee"));
+        // A batch built for another gate is not a Veto approval for this one.
+        let other = batch(Pubkey::new_unique(), operator);
+        assert!(check_approval(&transaction(&other, &payer), &operator, &gate).is_err());
     }
 
     #[test]
