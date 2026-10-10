@@ -176,10 +176,20 @@ function renderStatus(data) {
   announceWorkflow(data, headline, enabled);
 }
 
+const watchHint = document.getElementById("upgrade-watch-hint").textContent;
+
 // Upgrade watcher: every pinned program whose deployment changed since approval.
 function renderUpgradeWatch(data) {
   const changed = Array.isArray(data.changedPrograms) ? data.changedPrograms : [];
-  document.getElementById("upgrade-watch").hidden = changed.length === 0;
+  const failed = data.watchError === true;
+  const panel = document.getElementById("upgrade-watch");
+  panel.hidden = changed.length === 0 && !failed;
+  if (failed) panel.dataset.status = "error";
+  else panel.removeAttribute("data-status");
+  // A failed read must not look like "nothing changed".
+  document.getElementById("upgrade-watch-hint").textContent = failed
+    ? "The upgrade watcher could not read the pinned programs, so changes may be missing from this list. Veto still blocks the agent on-chain until every changed program is approved."
+    : watchHint;
   const rows = changed.map((entry) => {
     const row = document.createElement("li");
     row.className = "changed-row";
@@ -201,8 +211,8 @@ function renderUpgradeWatch(data) {
   document.getElementById("changed-list").replaceChildren(...rows);
   const approveAll = document.getElementById("approve-all");
   const reviewed = changed.length > 0 && changed.every((entry) => entry.codeMatchesReviewed === true);
-  approveAll.textContent = reviewed ? "Review and approve all (" + changed.length + ")" : "Changed code not reviewed";
-  approveAll.disabled = busy || !reviewed || (data.hosted && !data.owned);
+  approveAll.textContent = failed ? "Watcher unavailable" : (reviewed ? "Review and approve all (" + changed.length + ")" : "Changed code not reviewed");
+  approveAll.disabled = busy || failed || !reviewed || (data.hosted && !data.owned);
 }
 
 function renderUnavailable() {
