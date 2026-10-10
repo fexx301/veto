@@ -20,7 +20,7 @@ the scripted local runs and hosted demo-operator runs.
 | Policy account creation | Operator-signed setup transaction (policy key co-signs; server pays) | Create, initialize and bind the policy atomically | `demo/payment.rs` `setup_ixs` |
 | Merchant-pay upgrade authority | Server `protocol` key (stands in for the protocol team) | Upgrade the payment target | `run-local-demo.sh`, `deploy-devnet.sh` |
 | Counter, router, relay fixtures' upgrade authority (local) | Server `human` key | Upgrade those fixtures | `run-local-demo.sh` |
-| Veto gate upgrade authority | Local: server `human` key. Devnet: a `gate-authority` key never copied to the hosted server; not finalized | Replace the gate code | `run-local-demo.sh`, `deploy-devnet.sh` |
+| Veto gate upgrade authority | Local: server `human` key. Devnet: none, finalized on 2026-10-10 (the gate can no longer be upgraded) | Replace the gate code | `run-local-demo.sh`, `deploy-devnet.sh` |
 | Swig program upgrade authority | Swig team (devnet program cloned by default); server `human` key only with `SWIG_SO` | Replace the wallet program | `run-local-demo.sh` |
 | Fee payer / transaction preparer | Server setup key | Pays fees; builds the approval transaction the operator signs | `prepare_operator_approval` |
 
@@ -42,9 +42,8 @@ Veto also trusts the programs it cannot pin itself:
   simply stop requiring Veto's instruction. Swig's upgrade authority is a
   trust dependency, as for any Swig wallet.
 - **The Veto gate itself.** Whoever can upgrade the gate can replace its
-  checks while every Swig role keeps pointing at it. On devnet that key is
-  held off the hosted server; finalizing the gate would remove it entirely,
-  and is deferred so fixes can still be deployed.
+  checks while every Swig role keeps pointing at it. On devnet the gate was
+  finalized on 2026-10-10, so that risk no longer applies there.
 
 ## Why a deployment slot identifies code
 

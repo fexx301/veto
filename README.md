@@ -117,8 +117,8 @@ AWS deployment scripts are in `adapter/scripts/` and `adapter/deploy/aws/`.
   downstream programs, approvals can be added or re-pinned but not yet revoked,
   and legacy-loader programs are refused. Jupiter-scale routes are untested.
 - One Veto-protected `SignV2` per transaction; Swig only.
-- Devnet only. The gate is not audited, and its upgrade authority is not yet
-  finalized.
+- Devnet only. The gate is not audited. Its upgrade authority is finalized
+  (since 2026-10-10), so the gate's own code can never change.
 - No public Solana incident is known in which a malicious upgrade drained users;
   Veto is a preventive control for a documented structural risk.
 

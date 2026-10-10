@@ -68,3 +68,7 @@ The route-pinning gate [`4okceHnZ…ShJq`](https://explorer.solana.com/address/4
 Hosted console redeployed the same day with the third-review server fixes (HSTS and CSP headers confirmed live). Full demo-operator run through https://veto-demo.duckdns.org against the upgraded gate: both wallets 500 → 490; protocol ships v2; plain wallet charged 490 (→ 0.00) while Veto blocked (490 kept); reviewed build redeployed; approved; Veto 490 → 480. Naming the server's own key as operator was refused ("choose the demo operator instead of entering the server's own address").
 
 Later the same day the gate was upgraded again with the fourth-review fixes (slot 504796288; bytes match build `edc33fcf…520d`; upgrade authority still `H21vqhFx…aB8`, not finalized) and the hosted console redeployed. Live run: `2026-09-27-hosted-live-run.log`.
+
+## Gate finalized — 2026-10-10
+
+The route-pinning gate [`4okceHnZ…ShJq`](https://explorer.solana.com/address/4okceHnZABKcqadXLK57mkU87c4GAUKNsunr5LHHShJq?cluster=devnet) was finalized with `deploy-devnet.sh --finalize`: `solana program show` now reports `Authority: none`, last deployed slot 504796288. Before finalizing, its deployed bytes were confirmed identical to the build of the current `adapter/src/lib.rs` (which includes every review fix). The gate's code can no longer change.
