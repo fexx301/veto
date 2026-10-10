@@ -191,7 +191,11 @@ pub fn deployed_code_hash(rpc: &RpcClient, program: &Pubkey) -> Result<String> {
 /// approval can never pair the slot of one deployment with the hash of
 /// another.
 pub fn deployment_snapshot(rpc: &RpcClient, program: &Pubkey) -> Result<(u64, String)> {
-    let data = rpc.get_account_data(&get_program_data_address(program))?;
+    programdata_snapshot(&rpc.get_account_data(&get_program_data_address(program))?)
+}
+
+/// `deployment_snapshot` over ProgramData bytes already read.
+pub fn programdata_snapshot(data: &[u8]) -> Result<(u64, String)> {
     let metadata_len = UpgradeableLoaderState::size_of_programdata_metadata();
     let slot = match bincode::deserialize(
         data.get(..metadata_len).ok_or_else(|| anyhow!("ProgramData is too short"))?,
@@ -358,6 +362,35 @@ pub fn deploy(solana_bin: &str, rpc_url: &str, authority_path: &str, program_key
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_owned())
 }
 
+/// A program pinned in a Veto policy at the deployment slot the operator
+/// approved: the target, or one downstream route program.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Pin {
+    pub program: Pubkey,
+    pub slot: u64,
+    pub is_target: bool,
+}
+
+/// Every program an initialized policy pins: the target, then the route
+/// entries. Mirrors the gate's layout: the header ends with the target slot
+/// and agent, then a route count byte and fixed 40-byte (program, slot) entries.
+pub fn policy_pins(policy: &[u8]) -> Result<Vec<Pin>> {
+    const ROUTE_COUNT: usize = POLICY_SLOT_START + 8 + 32;
+    const ROUTE_ENTRY_LEN: usize = 40;
+    const MAX_ROUTE: usize = (POLICY_LEN - ROUTE_COUNT - 1) / ROUTE_ENTRY_LEN;
+    if policy.len() != POLICY_LEN || policy[0] != 1 {
+        bail!("the Veto policy is not initialized")
+    }
+    let key = |start: usize| Pubkey::new_from_array(policy[start..start + 32].try_into().unwrap());
+    let slot = |start: usize| u64::from_le_bytes(policy[start..start + 8].try_into().unwrap());
+    let mut pins = vec![Pin { program: key(33), slot: slot(POLICY_SLOT_START), is_target: true }];
+    for index in 0..(policy[ROUTE_COUNT] as usize).min(MAX_ROUTE) {
+        let start = ROUTE_COUNT + 1 + index * ROUTE_ENTRY_LEN;
+        pins.push(Pin { program: key(start), slot: slot(start + 32), is_target: false });
+    }
+    Ok(pins)
+}
+
 fn approval_data(discriminator: u8, reviewed_slot: u64) -> Vec<u8> {
     let mut data = vec![discriminator];
     data.extend_from_slice(&reviewed_slot.to_le_bytes());
@@ -455,6 +488,33 @@ impl Guarded {
         }
     }
 
+    /// One operator signature re-pinning several programs: `reapprove` for the
+    /// target and `approve_route_program` for each route program, each at the
+    /// slot in its pin. The caller supplies slots it checked against the
+    /// reviewed code, one snapshot per program.
+    pub fn batch_approval_ixs(&self, operator: Pubkey, agent: Pubkey, pins: &[Pin]) -> Result<Vec<Instruction>> {
+        if pins.is_empty() {
+            bail!("no changed program needs approval")
+        }
+        let mut seen = Vec::with_capacity(pins.len());
+        pins.iter()
+            .map(|pin| {
+                if seen.contains(&pin.program) {
+                    bail!("program {} appears twice in one approval", pin.program)
+                }
+                seen.push(pin.program);
+                if pin.is_target != (pin.program == self.pay) {
+                    bail!("program {} is not pinned in the role the approval names", pin.program)
+                }
+                Ok(if pin.is_target {
+                    self.approval_ix(1, operator, agent, pin.slot)
+                } else {
+                    self.approve_program_ix(operator, pin.program, pin.slot)
+                })
+            })
+            .collect()
+    }
+
     /// Creates the policy account, initializes it, and adds the Veto-bound
     /// Swig role in one transaction. The operator signs as Swig root and as
     /// the policy authority; the policy key signs its own initialization.
@@ -492,6 +552,14 @@ impl Guarded {
             )?,
             self.approve_program_ix(operator, TOKEN_PROGRAM_ID, token_slot),
         ])
+    }
+
+    /// Every program the policy pins, or `None` before initialization.
+    pub fn pins(&self, rpc: &RpcClient) -> Result<Option<Vec<Pin>>> {
+        match rpc.get_account_with_commitment(&self.policy, rpc.commitment())?.value {
+            Some(account) if account.data.first() == Some(&1) => Ok(Some(policy_pins(&account.data)?)),
+            _ => Ok(None),
+        }
     }
 
     /// The approved deployment slot, or `None` before initialization.
