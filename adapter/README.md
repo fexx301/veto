@@ -113,6 +113,17 @@ validator needs; on devnet the gate's upgrade key stays off the hosted server.
 It refuses to prepare an approval while the deployed code differs from the
 reviewed build.
 
+The console watches every program the policy pins (merchant-pay and its route
+programs, such as SPL Token) and lists any whose deployment changed since
+approval. "Review and approve all" re-approves every changed program in one
+transaction the operator signs once, and only when each one runs reviewed
+code. merchant-pay's reviewed build is `PAY_V1_SO`. For route programs, set
+`REVIEWED_ROUTE_BUILDS` to comma-separated `PROGRAM_ID=PATH_TO_SO` entries: a
+listed program must match its build at run setup and at every re-approval,
+and once listed, redeploying its older approved code is refused too. An
+unlisted route program can only be re-approved at the code it was last
+approved at.
+
 The hosted demo (https://veto-demo.duckdns.org) works the same way when you
 connect your own devnet wallet. If you choose the demo operator instead, the
 server's test key is the wallet root and signs the approvals, so that run shows
