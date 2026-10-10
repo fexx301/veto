@@ -531,6 +531,22 @@ impl Guarded {
         // SPL Token runs on the upgradeable loader, so the payment route needs
         // its current deployment approved like any other downstream program.
         let (_, token_slot) = programdata_and_slot(rpc, &TOKEN_PROGRAM_ID)?;
+        self.setup_ixs_at(payer, operator, agent, mint, reviewed_slot, token_slot, rent)
+    }
+
+    /// As `setup_ixs`, pinning SPL Token at a slot the caller has already
+    /// checked, with the policy account's rent supplied by the caller.
+    #[allow(clippy::too_many_arguments)]
+    pub fn setup_ixs_at(
+        &self,
+        payer: Pubkey,
+        operator: Pubkey,
+        agent: Pubkey,
+        mint: Pubkey,
+        reviewed_slot: u64,
+        token_slot: u64,
+        rent: u64,
+    ) -> Result<Vec<Instruction>> {
         let mut role_prefix = vec![2];
         role_prefix.extend_from_slice(self.policy.as_ref());
         Ok(vec![

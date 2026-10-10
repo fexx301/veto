@@ -18,6 +18,7 @@ use {
     solana_commitment_config::CommitmentConfig,
     solana_loader_v3_interface::get_program_data_address,
     solana_sdk::{
+        instruction::Instruction,
         message::Message,
         pubkey::Pubkey,
         signature::{read_keypair_file, Keypair, Signature},
@@ -437,6 +438,9 @@ impl Shared {
         // Slot and hash from one snapshot: if the code changed after the check
         // or the restore above, setup refuses rather than approving it.
         let initial_slot = self.reviewed_slot()?;
+        // Checked before any wallet is funded, so a run whose SPL Token does
+        // not match its configured reviewed build never starts.
+        let token_slot = self.setup_token_slot()?;
         let protocol =
             read_keypair_file(&self.protocol_path).map_err(|error| anyhow!(error.to_string()))?;
         // The protocol team key pays for its own upgrade buffers.
@@ -505,14 +509,7 @@ impl Shared {
                 &self.rpc,
                 &self.setup,
                 &[&policy],
-                guarded.setup_ixs(
-                    &self.rpc,
-                    self.setup.pubkey(),
-                    operator,
-                    self.agent.pubkey(),
-                    self.mint,
-                    initial_slot,
-                )?,
+                self.setup_ixs(&guarded, operator, initial_slot, token_slot)?,
             )?;
             (
                 Phase::Ready,
@@ -565,6 +562,38 @@ impl Shared {
         }
     }
 
+    /// SPL Token's slot for a run's setup approval. With a configured reviewed
+    /// build it must match that build, slot and hash from one snapshot;
+    /// without one, the deployed code is approved and becomes its reviewed
+    /// code, as before.
+    fn setup_token_slot(&self) -> Result<u64> {
+        match self.configured_build(&TOKEN_PROGRAM_ID) {
+            Some(hash) => self.reviewed_slot_of(&TOKEN_PROGRAM_ID, Some(&hash)),
+            None => Ok(programdata_and_slot(&self.rpc, &TOKEN_PROGRAM_ID)?.1),
+        }
+    }
+
+    /// The setup approval for a run: create and initialize its policy, add the
+    /// Veto-bound agent role, and pin SPL Token at `token_slot`.
+    fn setup_ixs(&self, guarded: &Guarded, operator: Pubkey, reviewed_slot: u64, token_slot: u64) -> Result<Vec<Instruction>> {
+        guarded.setup_ixs_at(
+            self.setup.pubkey(),
+            operator,
+            self.agent.pubkey(),
+            self.mint,
+            reviewed_slot,
+            token_slot,
+            self.rpc.get_minimum_balance_for_rent_exemption(POLICY_LEN)?,
+        )
+    }
+
+    /// The configured reviewed build of a route program, if any.
+    fn configured_build(&self, program: &Pubkey) -> Option<String> {
+        self.reviewed_route_builds
+            .iter()
+            .find_map(|(listed, hash)| (listed == program).then(|| hash.clone()))
+    }
+
     /// The reviewed code hash for a pinned program, if the console has one:
     /// the target's reviewed build, a route program's configured reviewed
     /// build, or else the code it was approved at.
@@ -572,11 +601,7 @@ impl Shared {
         if pin.is_target {
             return (pin.program == self.target).then(|| self.reviewed_hash.clone());
         }
-        let configured = self
-            .reviewed_route_builds
-            .iter()
-            .find_map(|(program, hash)| (*program == pin.program).then(|| hash.clone()));
-        configured.or_else(|| {
+        self.configured_build(&pin.program).or_else(|| {
             run.reviewed_routes
                 .iter()
                 .find_map(|(program, hash)| (*program == pin.program).then(|| hash.clone()))
@@ -794,14 +819,7 @@ impl DemoState {
         let reviewed_slot = shared.reviewed_slot()?;
         let (instructions, initializes_policy) = match run.phase {
             Phase::AwaitingApproval => (
-                run.guarded.setup_ixs(
-                    &shared.rpc,
-                    shared.setup.pubkey(),
-                    run.operator,
-                    shared.agent.pubkey(),
-                    shared.mint,
-                    reviewed_slot,
-                )?,
+                shared.setup_ixs(&run.guarded, run.operator, reviewed_slot, shared.setup_token_slot()?)?,
                 true,
             ),
             Phase::Fixed => (
@@ -1718,6 +1736,21 @@ mod tests {
             run.reviewed_routes,
             vec![(TOKEN_PROGRAM_ID, "token-v2".to_owned()), (router, "router-upgraded".to_owned())]
         );
+    }
+
+    #[test]
+    fn setup_pins_spl_token_at_the_checked_slot() {
+        let target = Pubkey::new_unique();
+        let (payer, operator, agent) = (Pubkey::new_unique(), Pubkey::new_unique(), Pubkey::new_unique());
+        let guarded = guarded(target);
+        let ixs = guarded
+            .setup_ixs_at(payer, operator, agent, Pubkey::new_unique(), 41, 17, 999)
+            .unwrap();
+        assert_eq!(ixs.len(), 4);
+        assert_eq!(ixs[1], guarded.approval_ix(0, operator, agent, 41));
+        assert_eq!(ixs[3], guarded.approve_program_ix(operator, TOKEN_PROGRAM_ID, 17));
+        // The policy account is funded with the rent the caller supplied.
+        assert_eq!(ixs[0].data[4..12], 999u64.to_le_bytes());
     }
 
     #[test]
