@@ -1,6 +1,6 @@
 // Veto operator console page logic (served as /app.js; no inline script).
 const actions = ["execute", "upgrade", "probe", "fix", "reapprove", "resume"];
-const validActions = new Set(["approve", "start", "start-demo", ...actions]);
+const validActions = new Set(["approve", "approve-all", "start", "start-demo", ...actions]);
 const errorBanner = document.getElementById("action-error");
 const sessionLedger = document.getElementById("session-ledger");
 const workflowAnnouncer = document.getElementById("workflow-announcer");
@@ -172,7 +172,37 @@ function renderStatus(data) {
     button.disabled = busy || button.dataset.action !== enabled || approvalBlocked;
     button.setAttribute("aria-busy", busy && button.dataset.action === enabled ? "true" : "false");
   }
+  renderUpgradeWatch(data);
   announceWorkflow(data, headline, enabled);
+}
+
+// Upgrade watcher: every pinned program whose deployment changed since approval.
+function renderUpgradeWatch(data) {
+  const changed = Array.isArray(data.changedPrograms) ? data.changedPrograms : [];
+  document.getElementById("upgrade-watch").hidden = changed.length === 0;
+  const rows = changed.map((entry) => {
+    const row = document.createElement("li");
+    row.className = "changed-row";
+    const matches = entry.codeMatchesReviewed === true;
+    if (!matches) row.dataset.status = "mismatch";
+    const name = document.createElement("strong");
+    name.textContent = (entry.name === entry.program ? shortAddress(entry.program) : entry.name) + (entry.role === "target" ? " · target" : " · route");
+    name.title = entry.program;
+    const code = document.createElement("span");
+    code.className = "changed-code";
+    code.textContent = matches ? "Reviewed build" : "Not reviewed";
+    code.title = entry.currentCodeHash ? "sha256 " + entry.currentCodeHash : "";
+    const slots = document.createElement("span");
+    slots.className = "changed-slots";
+    slots.textContent = "slot " + entry.approvedSlot + " → " + entry.currentSlot;
+    row.append(name, code, slots);
+    return row;
+  });
+  document.getElementById("changed-list").replaceChildren(...rows);
+  const approveAll = document.getElementById("approve-all");
+  const reviewed = changed.length > 0 && changed.every((entry) => entry.codeMatchesReviewed === true);
+  approveAll.textContent = reviewed ? "Review and approve all (" + changed.length + ")" : "Changed code not reviewed";
+  approveAll.disabled = busy || !reviewed || (data.hosted && !data.owned);
 }
 
 function renderUnavailable() {
@@ -185,6 +215,7 @@ function renderUnavailable() {
   currentAction.textContent = "State unavailable";
   currentAction.disabled = true;
   document.querySelectorAll("[data-action]").forEach((button) => button.disabled = true);
+  document.getElementById("approve-all").disabled = true;
   document.querySelectorAll(".step").forEach((row) => {
     row.dataset.state = "pending";
     row.querySelector(".step-status").textContent = "Unavailable";
@@ -210,6 +241,7 @@ function appendEvent(action, data) {
     probe: ["Agent · Veto", "Payment request", "blocked", "danger"],
     fix: ["Protocol", "Redeployed reviewed build", "slot changed", "warning"],
     reapprove: ["Operator", "Approve deployment", "approved", "success"],
+    "approve-all": ["Operator", "Approve all changed programs", "approved", "success"],
     resume: ["Agent", "Paid 10 through Veto", "allowed", "success"]
   }[action];
   const signature = (data.latest.detail.match(/Signature:\s*([1-9A-HJ-NP-Za-km-z]+)/) || [])[1] || "local transaction";
@@ -268,7 +300,8 @@ async function refresh(clearExistingError = true) {
 
 async function signOperatorApproval(action) {
   if (!lastStatus?.externalOperator) throw new Error("This session is not configured for an external operator wallet.");
-  const preparedResponse = await fetch("/api/operator/approval-transaction", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  const endpoint = action === "approve-all" ? "/api/operator/batch-approval-transaction" : "/api/operator/approval-transaction";
+  const preparedResponse = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
   const prepared = await preparedResponse.json();
   if (!preparedResponse.ok) throw new Error(prepared.error || "Could not prepare the approval transaction.");
   const signed = await VetoWallet.signApproval(prepared.transaction, prepared.operator, prepared.gate);
@@ -284,13 +317,16 @@ async function runAction(action) {
   busy = true;
   setError("");
   let actionFailed = false;
-  const actionButtons = [...document.querySelectorAll('[data-action="' + action + '"]'), document.getElementById("current-action")];
+  const actionButtons = action === "approve-all"
+    ? [document.getElementById("approve-all")]
+    : [...document.querySelectorAll('[data-action="' + action + '"]'), document.getElementById("current-action")];
+  const viaWallet = action === "start" || action === "approve" || ((action === "reapprove" || action === "approve-all") && lastStatus?.externalOperator);
   const priorTexts = actionButtons.map((button) => button.textContent.trim());
-  document.querySelectorAll("[data-action],#current-action,#start-demo").forEach((button) => button.disabled = true);
+  document.querySelectorAll("[data-action],#current-action,#start-demo,#approve-all").forEach((button) => button.disabled = true);
   actionButtons.forEach((button) => {
     button.dataset.busy = "true";
     button.setAttribute("aria-busy", "true");
-    button.textContent = (action === "start" || action === "approve" || (action === "reapprove" && lastStatus?.externalOperator)) ? "Waiting for wallet…" : (action === "start-demo" ? "Creating wallets…" : "Submitting…");
+    button.textContent = viaWallet ? "Waiting for wallet…" : (action === "start-demo" ? "Creating wallets…" : "Submitting…");
   });
   try {
     if (action === "start" || action === "start-demo") {
@@ -302,7 +338,7 @@ async function runAction(action) {
       eventCount = 0;
       renderStatus(data);
       appendEvent(action, data);
-    } else if (action === "approve" || (action === "reapprove" && lastStatus?.externalOperator)) {
+    } else if (viaWallet) {
       await signOperatorApproval(action);
     } else {
       const response = await fetch("/api/action/" + action, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
@@ -332,6 +368,7 @@ async function runAction(action) {
 document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => runAction(button.dataset.action)));
 document.getElementById("current-action").addEventListener("click", (event) => runAction(event.currentTarget.dataset.currentAction));
 document.getElementById("start-demo").addEventListener("click", () => runAction("start"));
+document.getElementById("approve-all").addEventListener("click", () => runAction("approve-all"));
 document.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-copy-value]");
   if (!button || !button.dataset.copyValue) return;
