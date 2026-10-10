@@ -16,6 +16,7 @@ use {
     serde_json::{json, Value},
     solana_client::rpc_client::RpcClient,
     solana_commitment_config::CommitmentConfig,
+    solana_loader_v3_interface::get_program_data_address,
     solana_sdk::{
         message::Message,
         pubkey::Pubkey,
@@ -135,6 +136,28 @@ struct Run {
     phase: Phase,
     latest: Value,
     pending_approval: Option<PendingApproval>,
+    /// Code hash of each route program at the deployment the operator
+    /// approved at setup. The console has no build of its own to review for
+    /// these, so the approved deployment is the reviewed code.
+    reviewed_routes: Vec<(Pubkey, String)>,
+}
+
+/// One program pinned in the run's policy, as the upgrade watcher saw it.
+struct Watched {
+    pin: Pin,
+    current_slot: u64,
+    current_hash: String,
+    reviewed_hash: Option<String>,
+}
+
+impl Watched {
+    fn changed(&self) -> bool {
+        self.current_slot != self.pin.slot
+    }
+
+    fn code_matches(&self) -> bool {
+        self.reviewed_hash.as_deref() == Some(self.current_hash.as_str())
+    }
 }
 
 struct DemoState {
@@ -349,6 +372,7 @@ impl Shared {
             policy: policy.pubkey(),
             pay: self.target,
         };
+        let mut reviewed_routes = Vec::new();
         let (phase, latest) = if operator == self.setup.pubkey() {
             send(
                 &self.rpc,
@@ -363,6 +387,7 @@ impl Shared {
                     initial_slot,
                 )?,
             )?;
+            reviewed_routes = self.route_baseline(&guarded)?;
             (
                 Phase::Ready,
                 json!({
@@ -398,7 +423,68 @@ impl Shared {
             phase,
             latest,
             pending_approval: None,
+            reviewed_routes,
         })
+    }
+
+    /// Hashes of the route programs at the deployments the policy pins. Read
+    /// right after the operator's setup approval; a program already upgraded
+    /// past its pin by then is left out, so the console never approves it.
+    fn route_baseline(&self, guarded: &Guarded) -> Result<Vec<(Pubkey, String)>> {
+        let mut reviewed = Vec::new();
+        for pin in guarded.pins(&self.rpc)?.unwrap_or_default() {
+            if pin.is_target {
+                continue;
+            }
+            let (slot, hash) = deployment_snapshot(&self.rpc, &pin.program)?;
+            if slot == pin.slot {
+                reviewed.push((pin.program, hash));
+            }
+        }
+        Ok(reviewed)
+    }
+
+    /// The reviewed code hash for a pinned program, if the console has one.
+    fn reviewed_hash_for(&self, run: &Run, pin: &Pin) -> Option<String> {
+        if pin.is_target {
+            return (pin.program == self.target).then(|| self.reviewed_hash.clone());
+        }
+        run.reviewed_routes
+            .iter()
+            .find_map(|(program, hash)| (*program == pin.program).then(|| hash.clone()))
+    }
+
+    /// Upgrade watcher: the current deployment of every program the run's
+    /// policy pins (target and route entries), one ProgramData snapshot each.
+    fn watch(&self, run: &Run) -> Result<Vec<Watched>> {
+        let Some(pins) = run.guarded.pins(&self.rpc)? else {
+            return Ok(Vec::new());
+        };
+        let addresses: Vec<Pubkey> = pins.iter().map(|pin| get_program_data_address(&pin.program)).collect();
+        let accounts = self.rpc.get_multiple_accounts(&addresses)?;
+        pins.into_iter()
+            .zip(accounts)
+            .map(|(pin, account)| {
+                let account = account.ok_or_else(|| anyhow!("missing ProgramData for {}", pin.program))?;
+                let (current_slot, current_hash) = programdata_snapshot(&account.data)?;
+                Ok(Watched {
+                    reviewed_hash: self.reviewed_hash_for(run, &pin),
+                    pin,
+                    current_slot,
+                    current_hash,
+                })
+            })
+            .collect()
+    }
+
+    fn program_name(&self, program: &Pubkey) -> String {
+        if *program == self.target {
+            "merchant-pay".into()
+        } else if *program == TOKEN_PROGRAM_ID {
+            "SPL Token".into()
+        } else {
+            program.to_string()
+        }
     }
 }
 
@@ -491,6 +577,8 @@ impl DemoState {
             status["phase"] = json!("idle");
             status["owned"] = json!(false);
             status["approvedSlot"] = Value::Null;
+            status["pinnedPrograms"] = json!(0);
+            status["changedPrograms"] = json!([]);
             status["latest"] = json!({ "label": "No run yet", "tone": "neutral", "detail": "" });
             return Ok(status);
         };
@@ -514,6 +602,24 @@ impl DemoState {
             },
             "latest": &run.latest,
         });
+        let watched = shared.watch(run)?;
+        status["pinnedPrograms"] = json!(watched.len());
+        status["changedPrograms"] = watched
+            .iter()
+            .filter(|watched| watched.changed())
+            .map(|watched| {
+                json!({
+                    "program": watched.pin.program.to_string(),
+                    "name": shared.program_name(&watched.pin.program),
+                    "role": if watched.pin.is_target { "target" } else { "route" },
+                    "approvedSlot": watched.pin.slot,
+                    "currentSlot": watched.current_slot,
+                    "currentCodeHash": watched.current_hash,
+                    "reviewedCodeHash": watched.reviewed_hash,
+                    "codeMatchesReviewed": watched.code_matches(),
+                })
+            })
+            .collect();
         for (key, value) in fields.as_object().into_iter().flatten() {
             status[key] = value.clone();
         }
@@ -635,6 +741,9 @@ impl DemoState {
         let signature = shared.rpc.send_and_confirm_transaction(&transaction)?;
         if run.guarded.approved_slot(&shared.rpc)? != Some(pending.reviewed_slot) {
             bail!("operator approval did not pin the reviewed deployment slot")
+        }
+        if pending.initializes_policy {
+            run.reviewed_routes = shared.route_baseline(&run.guarded)?;
         }
         run.phase = if pending.initializes_policy {
             Phase::Ready
