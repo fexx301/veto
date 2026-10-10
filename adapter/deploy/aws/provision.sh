@@ -26,6 +26,11 @@ if ! swapon --show | grep -q /swapfile; then
   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
 fi
 
+# Caddy's apt repository (Cloudsmith) began answering 402 in October 2026,
+# which breaks every apt-get update. Once Caddy is installed, drop its source.
+if command -v caddy >/dev/null; then
+  sudo rm -f /etc/apt/sources.list.d/caddy-stable.list
+fi
 sudo apt-get update -qq
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
   build-essential pkg-config libssl-dev libudev-dev clang curl ca-certificates \
